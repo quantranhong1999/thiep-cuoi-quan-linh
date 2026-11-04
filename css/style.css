@@ -349,6 +349,10 @@ h1, h2, p, figure { margin: 0; }
 .cal-d.trai::after { border-color: var(--primary); animation-delay: 1.2s; }
 @keyframes day-pulse { 0% { transform: scale(1); opacity: .75; } 70%, 100% { transform: scale(1.65); opacity: 0; } }
 html.no-fx .cal-d::after { display: none; }
+.cal-heart { position: absolute; left: 0; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -13px; border-radius: 50%; background: var(--panel); display: flex; align-items: center; justify-content: center; z-index: 2; animation: heart-beat 1.4s ease-in-out infinite; }
+.cal-heart svg { width: 13px; height: 13px; fill: var(--primary); }
+@keyframes heart-beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.22); } 30% { transform: scale(1); } 45% { transform: scale(1.12); } }
+html.no-fx .cal-heart { animation: none; }
 .countdown-col { text-align: center; display: grid; gap: 14px; justify-items: center; }
 .countdown { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1.5cqi, 12px); width: min(100%, 460px); }
 .cd-tile { background: var(--primary); color: var(--paper); padding: 18px 4px 12px; display: grid; gap: 4px; border-radius: 999px 999px 0 0; }

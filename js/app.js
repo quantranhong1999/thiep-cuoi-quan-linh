@@ -84,6 +84,13 @@
       c.className = 'cal-d' + (d === 28 ? ' gai' : d === 29 ? ' trai' : '');
       c.textContent = d;
       if (tag) c.title = tag;
+      if (d === 29) { // a small heart joining the two wedding days (28 and 29 sit side by side)
+        const h = document.createElement('span');
+        h.className = 'cal-heart';
+        h.setAttribute('aria-hidden', 'true');
+        h.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s-6.7-4.4-9.2-8.2C1 10.1 2.1 6.4 5.4 5.6c2-.5 3.9.3 5 2 .4.6.8.6 1.2 0 1.1-1.7 3-2.5 5-2 3.3.8 4.4 4.5 2.6 7.2C18.7 16.6 12 21 12 21z"/></svg>';
+        c.appendChild(h);
+      }
       cal.appendChild(c);
     }
   })();
