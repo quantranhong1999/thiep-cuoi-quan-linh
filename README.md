@@ -1,9 +1,7 @@
 # Thiệp cưới online · Hồng Quân & Khánh Linh
 
 Trang tĩnh (HTML, CSS, JS thuần, không cần build), dựng từ gói `design_handoff_thiep_cuoi`, đổi sang tông xanh rêu.
-
-- Thiệp: https://quantranhong1999.github.io/thiep-cuoi-quan-linh/ (GitHub Pages, đăng bằng GitHub Actions mỗi lần push lên `main`)
-- Bản demo (Claude Artifact, có lời chúc mẫu): https://claude.ai/artifact/7rMGnvD9TYHz12qaFexiD8
+Đăng lên GitHub Pages bằng GitHub Actions mỗi lần push lên `main`. Repo cố ý không ghi link thiệp.
 
 ## Cấu trúc
 
@@ -16,8 +14,8 @@ Trang tĩnh (HTML, CSS, JS thuần, không cần build), dựng từ gói `desig
 | `assets/` | Ảnh đã nén (bản gốc + bản 640px), mã QR, nhạc 128 kbps, ảnh xem trước `og.jpg` |
 | `google-sheets/` | Apps Script nhận hồi âm + lời chúc, và hướng dẫn cài |
 | `scripts/optimize-assets.sh` | Tạo lại `assets/` từ gói bàn giao và thư mục `Ảnh cưới` (danh sách ảnh dùng trên thiệp ở đầu script, cần ffmpeg) |
-| `scripts/build-site.mjs`, `.github/workflows/pages.yml` | Đăng lên GitHub Pages: chép trang vào `_site/` và chèn URL Google Sheets từ secret `SHEET_URL` |
-| `scripts/build-artifact.mjs` | Tạo `dist-artifact/index.html` cho bản demo trên Claude Artifact (bật lời chúc mẫu) |
+| `scripts/build-site.mjs`, `.github/workflows/pages.yml` | Đăng lên GitHub Pages: chép trang vào `_site/`, chèn URL Google Sheets từ secret `SHEET_URL` và link đầy đủ cho ảnh xem trước |
+| `scripts/build-artifact.mjs` | Tạo `dist-artifact/index.html` cho bản xem thử trên Claude Artifact (bật lời chúc mẫu) |
 
 ## Chạy thử trên máy
 

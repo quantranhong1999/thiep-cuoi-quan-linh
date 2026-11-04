@@ -24,12 +24,12 @@ Mở thiệp bằng trình duyệt hoặc điện thoại khác thì là một k
    - Bấm **Triển khai**, copy **URL ứng dụng web** (dạng `https://script.google.com/macros/s/…/exec`).
 6. Lưu URL đó thành secret `SHEET_URL` của repo GitHub, rồi đăng lại thiệp. URL không nằm trong mã nguồn của repo;
    GitHub Actions chèn nó vào thiệp lúc đăng. Chọn một trong hai cách:
-   - **Trên terminal** (lệnh đầu sẽ hỏi URL, dán vào rồi Enter):
+   - **Trên terminal**, trong thư mục repo của thiệp (lệnh đầu sẽ hỏi URL, dán vào rồi Enter):
      ```bash
-     gh secret set SHEET_URL --repo quantranhong1999/thiep-cuoi-quan-linh
+     gh secret set SHEET_URL
      ```
      ```bash
-     gh workflow run pages.yml --repo quantranhong1999/thiep-cuoi-quan-linh
+     gh workflow run pages.yml
      ```
    - **Trên web:** repo → **Settings → Secrets and variables → Actions → New repository secret**,
      Name `SHEET_URL`, Secret là URL ở bước 5. Sau đó vào tab **Actions → Deploy to GitHub Pages → Run workflow**.

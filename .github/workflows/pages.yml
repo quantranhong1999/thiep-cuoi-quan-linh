@@ -22,11 +22,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - id: pages
+        uses: actions/configure-pages@v5
       - name: Build _site with the Google Sheets URL from secrets
         env:
           SHEET_URL: ${{ secrets.SHEET_URL }}
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
         run: node scripts/build-site.mjs
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
