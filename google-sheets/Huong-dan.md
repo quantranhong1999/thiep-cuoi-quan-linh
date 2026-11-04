@@ -2,9 +2,12 @@
 
 Sau khi nối, mỗi lần khách bấm **Gửi hồi âm** trên thiệp:
 - Tab **Xác nhận**: thêm 1 dòng (tên, có đến không, dự bên nào, số người, lời chúc).
-- Tab **Lời chúc**: thêm 1 dòng nếu khách có viết lời chúc, ô **Duyệt** để trống.
+- Tab **Lời chúc**: thêm 1 dòng nếu khách có viết lời chúc. Lời chúc **hiện trên thiệp ngay**, không cần duyệt.
 
-Lời chúc **chỉ hiện trên thiệp khi anh/chị tick ô Duyệt**. Bỏ tick là ẩn lại.
+Khách có thể bấm **Sửa hồi âm** để đổi câu trả lời hoặc lời chúc. Mỗi trình duyệt của khách có một **Mã khách**
+(cột cuối): gửi lại từ cùng trình duyệt thì dòng cũ được sửa (cột **Sửa lúc** ghi giờ sửa), không thêm dòng mới.
+Nếu khách xoá trắng lời chúc khi sửa, dòng của họ trong tab **Lời chúc** cũng bị xoá.
+Mở thiệp bằng trình duyệt hoặc điện thoại khác thì là một khách mới.
 
 ## Cài đặt (khoảng 5 phút, làm một lần)
 
@@ -33,20 +36,24 @@ Lời chúc **chỉ hiện trên thiệp khi anh/chị tick ô Duyệt**. Bỏ t
 
 Khoảng một phút sau, thiệp trên GitHub Pages bắt đầu gửi hồi âm về Sheet.
 
-## Duyệt lời chúc
-Mở tab **Lời chúc** → tick ô cột **Duyệt** ở dòng muốn hiện. Khách mở (hoặc tải lại) thiệp sẽ thấy ngay.
+## Xoá lời chúc spam
+Mở tab **Lời chúc** → chuột phải vào số dòng → **Xoá hàng**. Lời chúc biến mất khỏi thiệp ngay lần tải trang tiếp theo.
+Hồi âm trong tab **Xác nhận** vẫn giữ; muốn bỏ thì xoá dòng đó ở tab **Xác nhận** luôn.
+Đừng sửa hay xoá cột **Mã khách**: thiệp dùng cột này để biết dòng nào của khách nào.
 
 ## Chống spam
 Script tự bỏ qua (nhưng vẫn báo "đã gửi" để bot không biết):
 - bài gửi có điền vào ô ẩn trên form (chỉ bot mới thấy ô này);
 - bài gửi không đi từ trang thiệp, hoặc gửi chưa tới 3 giây sau khi mở trang;
 - lời chúc có chèn link (`http://`, `https://`, `www.`);
-- bài gửi giống hệt một bài trong 6 giờ trước;
-- quá 60 bài gửi trong 10 phút (tính chung mọi khách), hoặc quá 5 bài mỗi giờ cho cùng một tên.
+- bài gửi không có Mã khách hợp lệ;
+- quá 60 bài gửi trong 10 phút (tính chung mọi khách), hoặc quá 10 lần gửi/sửa mỗi giờ cho cùng một khách.
 
-Các ngưỡng nằm ở đầu file `Code.gs` (`MAX_PER_10_MIN`, `MAX_PER_NAME_PER_HOUR`, `MIN_MS_ON_PAGE`).
+Các ngưỡng nằm ở đầu file `Code.gs` (`MAX_PER_10_MIN`, `MAX_PER_GUEST_PER_HOUR`, `MIN_MS_ON_PAGE`).
+Spam lọt qua vẫn hiện lên thiệp vì không có bước duyệt; khi thấy thì xoá dòng như ở trên.
 URL ứng dụng web vẫn xem được trên trang thiệp (F12), giống link Google Form: ai có URL thì gửi được, nhưng không đọc được Sheet.
 
 ## Lưu ý
 - Nếu sửa code Apps Script, phải **Triển khai → Quản lý triển khai → Sửa → Phiên bản mới** thì mới có hiệu lực (URL giữ nguyên).
-- Chỉ người có quyền vào Sheet mới xem được danh sách; khách chỉ thấy các lời chúc đã duyệt.
+- Nếu đã chạy `setup` với bản cũ (có cột **Duyệt**), chạy lại `setup` một lần để đổi tiêu đề cột.
+- Chỉ người có quyền vào Sheet mới xem được danh sách hồi âm; khách chỉ thấy các lời chúc trong tab **Lời chúc**.

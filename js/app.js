@@ -410,24 +410,37 @@
   });
 
   // ---------- RSVP + wishes ----------
+  // Each browser keeps one guest ID: sending again from the same browser edits the same rows in the sheet.
+  const guestId = (() => {
+    let id = store.get('id');
+    if (typeof id !== 'string' || !/^[A-Za-z0-9][\w-]{7,63}$/.test(id)) {
+      id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+      store.set('id', id);
+    }
+    return id;
+  })();
   const form = $('#rsvp-form'), nameIn = $('#rsvp-name'), msgIn = $('#rsvp-msg'), errEl = $('#rsvp-err');
   const submitBtn = $('[data-submit]', form), thanks = $('#rsvp-thanks');
-  const rsvp = { attend: 'yes', side: 'trai', guests: 1, sending: false };
+  const rsvp = { attend: 'yes', side: 'trai', guests: 1, sending: false, sent: false };
   let wishes = [];
 
+  function today() {
+    const d = new Date(), pad = n => String(n).padStart(2, '0');
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
   function renderForm() {
     $$('[data-attend]', form).forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-attend') === rsvp.attend)));
     $$('[data-side]', form).forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-side') === rsvp.side)));
     $('#rsvp-attending').hidden = rsvp.attend !== 'yes';
     $('#rsvp-guests').textContent = rsvp.guests;
-    submitBtn.textContent = rsvp.sending ? 'Đang gửi…' : 'Gửi hồi âm';
+    submitBtn.textContent = rsvp.sending ? 'Đang gửi…' : rsvp.sent ? 'Cập nhật hồi âm' : 'Gửi hồi âm';
     submitBtn.disabled = rsvp.sending;
   }
   function setErr(text) { errEl.textContent = text; errEl.hidden = !text; }
-  function showThanks(r, pendingWish, animate) {
+  function showThanks(r, animate) {
     $('#thanks-title').textContent = r.attend === 'yes' ? 'Yay! Hẹn gặp ' + r.name + ' nhé.' : 'Cảm ơn ' + r.name + ' đã báo tin.';
     $('#thanks-body').textContent = r.attend === 'yes' ? r.guests + ' người · ' + (SIDES[r.side] || '') : 'Chúng mình đã nhận được lời nhắn của bạn.';
-    $('#thanks-note').hidden = !pendingWish;
+    $('#thanks-note').textContent = (r.msg ? 'Lời chúc của bạn đã hiện trong khung lời chúc bên dưới. ' : '') + 'Nếu cần đổi gì, bạn bấm "Sửa hồi âm" trên trình duyệt này nhé.';
     form.hidden = true;
     thanks.hidden = false;
     if (animate && fxOn) thanks.animate(FX.blur, { duration: 900, easing: EASE });
@@ -442,49 +455,38 @@
     renderForm();
   });
   nameIn.addEventListener('input', () => setErr(''));
-  $('#rsvp-edit').addEventListener('click', () => { thanks.hidden = true; form.hidden = false; });
+  $('#rsvp-edit').addEventListener('click', () => { thanks.hidden = true; form.hidden = false; nameIn.focus(); });
 
   form.addEventListener('submit', e => {
     e.preventDefault();
     const name = nameIn.value.trim();
     if (!name) { setErr('Bạn cho chúng mình xin tên nhé.'); nameIn.focus(); return; }
-    const r = { name, attend: rsvp.attend, side: rsvp.side, guests: rsvp.guests };
     const msg = msgIn.value.trim();
-    if (C.sheetUrl) {
-      if (rsvp.sending) return;
-      rsvp.sending = true;
+    const r = { name, attend: rsvp.attend, side: rsvp.side, guests: rsvp.guests, msg };
+    const done = () => {
+      const edited = rsvp.sent;
+      rsvp.sent = true;
+      store.set('rsvp', r);
       setErr('');
+      if (!edited) burst();
+      showThanks(r, true);
+      setMine(msg ? { name, msg, t: today() } : null, edited);
       renderForm();
-      // Apps Script answers with a redirect, so the POST is fire-and-forget (opaque response): network success = sent.
-      fetch(C.sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ msg, hp: $('#rsvp-hp').value, ms: Math.round(performance.now()) }, r)) })
-        .then(() => {
-          store.set('rsvp', r);
-          rsvp.sending = false;
-          renderForm();
-          burst();
-          msgIn.value = '';
-          showThanks(r, !!msg, true);
-          if (msg) addMine({ name, msg }, true);
-        })
-        .catch(() => {
-          rsvp.sending = false;
-          renderForm();
-          setErr('Chưa gửi được, bạn kiểm tra mạng rồi thử lại nhé.');
-        });
-      return;
-    }
+    };
     // No sheet configured: keep everything in this browser (for trying the card out).
-    const wish = msg ? { name, msg, t: new Date().toLocaleDateString('vi-VN') } : null;
-    if (wish) {
-      wishes = [wish].concat(wishes).slice(0, 300);
-      store.set('wishes', wishes);
-    }
-    store.set('rsvp', r);
+    if (!C.sheetUrl) { done(); return; }
+    if (rsvp.sending) return;
+    rsvp.sending = true;
     setErr('');
-    burst();
-    msgIn.value = '';
-    showThanks(r, false, true);
-    if (wish) addMine(wish, false);
+    renderForm();
+    // Apps Script answers with a redirect, so the POST is fire-and-forget (opaque response): network success = sent.
+    fetch(C.sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ id: guestId, hp: $('#rsvp-hp').value, ms: Math.round(performance.now()) }, r)) })
+      .then(() => { rsvp.sending = false; done(); })
+      .catch(() => {
+        rsvp.sending = false;
+        renderForm();
+        setErr('Chưa gửi được, bạn kiểm tra mạng rồi thử lại nhé.');
+      });
   });
 
   // Wishes read like a chat: older ones sit above as history, the latest pop in one by one after a typing indicator.
@@ -512,7 +514,7 @@
     const bubble = el('msg-bubble', w.msg);
     if (status || w.t) bubble.appendChild(el('msg-time', status || w.t));
     if (!mine) {
-      const heart = el('msg-heart', '♥'); // the couple "liked" every approved wish
+      const heart = el('msg-heart', '♥'); // the couple "liked" every wish
       heart.setAttribute('aria-hidden', 'true');
       bubble.appendChild(heart);
     }
@@ -520,6 +522,7 @@
     row.append(avatarOf(w.name), col);
     return row;
   }
+  function rowFor(w) { return msgEl(w, !!w.mine, w.mine ? 'Lời chúc của bạn' : ''); }
   function nearBottom() { return chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 80; }
   function toBottom() {
     if (chatBody.scrollTo) chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: fxOn ? 'smooth' : 'auto' });
@@ -538,6 +541,14 @@
     if (!chatInView || !chatQueue.length) return; // resumes when the chat scrolls back into view
     const w = chatQueue.shift();
     const stick = nearBottom();
+    if (w.mine) { // the guest's own wish needs no typing indicator
+      const row = rowFor(w);
+      chatBody.appendChild(row);
+      popIn(row, true);
+      if (stick) toBottom();
+      chatTimer = setTimeout(chatStep, 900);
+      return;
+    }
     chatTyping = el('msg');
     const dots = el('msg-bubble typing');
     dots.innerHTML = '<i></i><i></i><i></i>';
@@ -559,7 +570,7 @@
     clearTimeout(chatTimer);
     chatTimer = 0;
     if (chatTyping) { chatTyping.remove(); chatTyping = null; }
-    chatQueue.splice(0).forEach(w => chatBody.appendChild(msgEl(w)));
+    chatQueue.splice(0).forEach(w => chatBody.appendChild(rowFor(w)));
   }
   function playChat() { if (chatInView && !chatTimer && !chatTyping && chatQueue.length) chatStep(); }
   const showSamples = !C.sheetUrl && C.sampleWishes;
@@ -574,20 +585,32 @@
     $('#wishes-count').textContent = list.length + ' lời chúc';
     chatBody.textContent = '';
     const live = fxOn ? Math.min(list.length, 6) : 0;
-    list.slice(0, list.length - live).forEach(w => chatBody.appendChild(msgEl(w)));
+    list.slice(0, list.length - live).forEach(w => chatBody.appendChild(rowFor(w)));
     chatQueue = list.slice(list.length - live);
     chatBody.scrollTop = chatBody.scrollHeight;
     playChat();
   }
-  // The guest's own wish lands on the right, like a message they just sent.
-  function addMine(w, pending) {
+  // The guest's own wish sits on the right, like a message they sent; sending again edits or removes it.
+  function setMine(w, edited) {
     flushChat();
-    chatBox.hidden = false;
-    if (!pending) $('#wishes-count').textContent = chatList().length + ' lời chúc';
-    const row = msgEl(w, true, pending ? 'Đã gửi · chờ cô dâu chú rể duyệt' : 'Vừa gửi');
-    chatBody.appendChild(row);
+    const i = wishes.findIndex(x => x.mine);
+    if (w) {
+      w.mine = true;
+      if (i >= 0) wishes[i] = Object.assign({}, wishes[i], { name: w.name, msg: w.msg });
+      else wishes.unshift(w);
+    } else if (i >= 0) {
+      wishes.splice(i, 1);
+    }
+    if (!C.sheetUrl) store.set('wishes', wishes);
+    const total = chatList().length;
+    chatBox.hidden = !total;
+    $('#wishes-count').textContent = total + ' lời chúc';
+    const old = $('.msg-me', chatBody);
+    if (!w) { if (old) old.remove(); return; }
+    const row = msgEl(w, true, edited && old ? 'Vừa sửa' : 'Vừa gửi');
+    if (old) old.replaceWith(row);
+    else { chatBody.appendChild(row); toBottom(); }
     popIn(row, true);
-    toBottom();
   }
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(entries => { chatInView = entries.some(e => e.isIntersecting); playChat(); }, { threshold: 0.3 }).observe(chatBox);
@@ -602,7 +625,7 @@
       renderWishes();
       return;
     }
-    fetch(C.sheetUrl + (C.sheetUrl.indexOf('?') < 0 ? '?' : '&') + 'action=wishes&_=' + Date.now())
+    fetch(C.sheetUrl + (C.sheetUrl.indexOf('?') < 0 ? '?' : '&') + 'action=wishes&me=' + encodeURIComponent(guestId) + '&_=' + Date.now())
       .then(r => r.json())
       .then(list => {
         if (!Array.isArray(list)) return;
@@ -617,8 +640,10 @@
     rsvp.attend = saved.attend === 'no' ? 'no' : 'yes';
     rsvp.side = SIDES[saved.side] ? saved.side : 'trai';
     rsvp.guests = Math.min(10, Math.max(1, +saved.guests || 1));
+    rsvp.sent = true;
     nameIn.value = saved.name;
-    showThanks(Object.assign({}, rsvp, { name: saved.name }), false, false);
+    msgIn.value = saved.msg || '';
+    showThanks(Object.assign({}, rsvp, { name: saved.name, msg: saved.msg || '' }), false);
   }
   renderForm();
   loadWishes();
