@@ -1,0 +1,23 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Thiep cuoi Quan Linh//VI
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:tiec-nha-gai-20261128@thiep-cuoi-quan-linh
+DTSTAMP:20261104T000000Z
+DTSTART:20261128T030000Z
+DTEND:20261128T060000Z
+SUMMARY:Tiệc cưới nhà gái · Hồng Quân & Khánh Linh
+LOCATION:Tư gia nhà gái\, Số 41\, ngõ 871 Trần Nhân Tông\, xã Ki
+ ến Xương\, tỉnh Hưng Yên
+DESCRIPTION:Trân trọng kính mời bạn đến dự tiệc cưới nhà
+  gái của Hồng Quân & Khánh Linh.\nChỉ đường: https://maps.app
+ .goo.gl/AW949kqETXaoLABW6
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Tiệc cưới nhà gái · Hồng Quân & Khánh Linh
+END:VALARM
+END:VEVENT
+END:VCALENDAR

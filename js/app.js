@@ -73,7 +73,8 @@
       const c = document.createElement('div');
       const tag = d === 28 ? 'Nhà gái' : d === 29 ? 'Nhà trai' : '';
       c.className = 'cal-d' + (d === 28 ? ' gai' : d === 29 ? ' trai' : '');
-      c.innerHTML = '<span>' + d + '</span><small>' + tag + '</small>';
+      c.textContent = d;
+      if (tag) c.title = tag;
       cal.appendChild(c);
     }
   })();
@@ -360,10 +361,22 @@
     startAuto(0);
   });
 
-  $('#dock-rsvp').addEventListener('click', e => {
+  // Floating RSVP pill: hidden while the form is on screen; after sending it reopens the form to edit.
+  const dockRsvp = $('#dock-rsvp');
+  dockRsvp.addEventListener('click', e => {
     e.preventDefault();
+    if (!$('#rsvp-thanks').hidden) $('#rsvp-edit').click();
     $('#hoi-am').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
   });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(entries => entries.forEach(en => dockRsvp.classList.toggle('is-away', en.isIntersecting)),
+      { rootMargin: '0px 0px -35% 0px' }).observe($('#hoi-am'));
+  }
+
+  // "Thêm vào lịch": iPhone and iPad open the .ics in the Calendar app; other devices use Google Calendar.
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    $$('[data-ics]').forEach(a => { a.href = a.getAttribute('data-ics'); a.removeAttribute('target'); });
+  }
 
   // ---------- album lightbox ----------
   const tiles = $$('#album [data-full]');
@@ -435,6 +448,7 @@
     $('#rsvp-guests').textContent = rsvp.guests;
     submitBtn.textContent = rsvp.sending ? 'Đang gửi…' : rsvp.sent ? 'Cập nhật hồi âm' : 'Gửi hồi âm';
     submitBtn.disabled = rsvp.sending;
+    dockRsvp.textContent = rsvp.sent ? 'Sửa hồi âm' : 'Xác nhận tham dự';
   }
   function setErr(text) { errEl.textContent = text; errEl.hidden = !text; }
   function showThanks(r, animate) {

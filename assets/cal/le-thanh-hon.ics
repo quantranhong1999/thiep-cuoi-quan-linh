@@ -1,0 +1,24 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Thiep cuoi Quan Linh//VI
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:le-thanh-hon-20261129@thiep-cuoi-quan-linh
+DTSTAMP:20261104T000000Z
+DTSTART:20261129T040000Z
+DTEND:20261129T070000Z
+SUMMARY:Lễ thành hôn & tiệc cưới nhà trai · Hồng Quân & Khán
+ h Linh
+LOCATION:Đại Huệ Palace\, 02 Nguyễn Phong Sắc\, phường Trườn
+ g Vinh\, tỉnh Nghệ An
+DESCRIPTION:Trân trọng kính mời bạn đến dự lễ thành hôn v
+ à tiệc cưới nhà trai của Hồng Quân & Khánh Linh.
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Lễ thành hôn & tiệc cưới nhà trai · Hồng Quân & K
+ hánh Linh
+END:VALARM
+END:VEVENT
+END:VCALENDAR
