@@ -10,7 +10,7 @@ Trang tĩnh (HTML, CSS, JS thuần, không cần build), dựng từ gói `desig
 | `index.html` | Toàn bộ nội dung thiệp, theo thứ tự các phần trong README bàn giao |
 | `css/style.css` | Màu (khối `:root` ở đầu file), chữ, bố cục |
 | `js/config.js` | Cấu hình: `sheetUrl`, bật/tắt phong bì, tự cuộn và tốc độ cuộn, hiệu ứng, âm lịch |
-| `js/app.js` | Phong bì, hiệu ứng, tự cuộn tốc độ cố định, album, hồi âm, lời chúc dạng khung chat, thêm vào lịch, sao chép số TK |
+| `js/app.js` | Phong bì, hiệu ứng, tự cuộn tốc độ cố định, album, hồi âm, sổ lưu bút lời chúc, emoji bấm nhanh, thêm vào lịch, sao chép số TK |
 | `assets/` | Ảnh đã nén (bản gốc + bản 640px), mã QR, nhạc 128 kbps, ảnh xem trước `og.jpg`, file lịch `cal/*.ics` cho iPhone |
 | `google-sheets/` | Apps Script nhận hồi âm + lời chúc, và hướng dẫn cài |
 | `scripts/optimize-assets.sh` | Tạo lại `assets/` từ gói bàn giao và thư mục `Ảnh cưới` (danh sách ảnh dùng trên thiệp ở đầu script, cần ffmpeg) |
