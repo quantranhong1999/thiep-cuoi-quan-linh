@@ -35,7 +35,7 @@ Trình duyệt của khách có thể giữ bản cũ thêm tối đa 10 phút.
 
 ## Google Sheets
 
-Hồi âm và lời chúc về Google Sheet "database thiệp cưới", qua dự án Apps Script "Thiệp cưới Quân & Linh"
+Hồi âm và lời chúc về tab "Xác nhận" của Google Sheet "database thiệp cưới", qua dự án Apps Script "Thiệp cưới Quân & Linh"
 gắn với Sheet đó (Tiện ích → Apps Script). URL ứng dụng web nằm trong secret `SHEET_URL` của repo.
 Sửa `google-sheets/Code.gs` thì dán lại vào Apps Script và tạo phiên bản triển khai mới, xem `google-sheets/Huong-dan.md`.
 

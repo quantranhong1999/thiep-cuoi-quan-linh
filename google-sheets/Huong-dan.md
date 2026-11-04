@@ -1,12 +1,10 @@
 # Nối thiệp với Google Sheets
 
-Sau khi nối, mỗi lần khách bấm **Gửi hồi âm** trên thiệp:
-- Tab **Xác nhận**: thêm 1 dòng (tên, có đến không, dự bên nào, số người, lời chúc).
-- Tab **Lời chúc**: thêm 1 dòng nếu khách có viết lời chúc. Lời chúc **hiện trên thiệp ngay**, không cần duyệt.
+Mọi thứ nằm trong một tab **Xác nhận**, mỗi khách một dòng: tên, có đến không, dự bên nào, số người, lời chúc.
+Lời chúc trong cột **Lời chúc** **hiện trên thiệp ngay**, không cần duyệt.
 
 Khách có thể bấm **Sửa hồi âm** để đổi câu trả lời hoặc lời chúc. Mỗi trình duyệt của khách có một **Mã khách**
-(cột cuối): gửi lại từ cùng trình duyệt thì dòng cũ được sửa (cột **Sửa lúc** ghi giờ sửa), không thêm dòng mới.
-Nếu khách xoá trắng lời chúc khi sửa, dòng của họ trong tab **Lời chúc** cũng bị xoá.
+(cột cuối): gửi lại từ cùng trình duyệt thì dòng cũ được sửa (cột **Sửa lúc** ghi ngày giờ sửa), không thêm dòng mới.
 Mở thiệp bằng trình duyệt hoặc điện thoại khác thì là một khách mới.
 
 ## Cài đặt (khoảng 5 phút, làm một lần)
@@ -16,7 +14,7 @@ Mở thiệp bằng trình duyệt hoặc điện thoại khác thì là một k
 2. Menu **Tiện ích mở rộng → Apps Script**.
 3. Xoá hết code mẫu, dán toàn bộ nội dung file `google-sheets/Code.gs` vào, bấm **Lưu** (biểu tượng đĩa).
 4. Ở thanh trên, chọn hàm **setup** → bấm **Chạy**. Google sẽ hỏi quyền → chọn tài khoản → **Nâng cao → Đi tới… (không an toàn) → Cho phép**. (Cảnh báo này là bình thường vì script do chính anh tạo.)
-   Quay lại Sheet sẽ thấy 2 tab **Xác nhận** và **Lời chúc**.
+   Quay lại Sheet sẽ thấy tab **Xác nhận**.
 5. Bấm **Triển khai → Tùy chọn triển khai mới**:
    - Bánh răng → chọn **Ứng dụng web**
    - Thực thi với tư cách: **Tôi**
@@ -37,8 +35,10 @@ Mở thiệp bằng trình duyệt hoặc điện thoại khác thì là một k
 Khoảng một phút sau, thiệp trên GitHub Pages bắt đầu gửi hồi âm về Sheet.
 
 ## Xoá lời chúc spam
-Mở tab **Lời chúc** → chuột phải vào số dòng → **Xoá hàng**. Lời chúc biến mất khỏi thiệp ngay lần tải trang tiếp theo.
-Hồi âm trong tab **Xác nhận** vẫn giữ; muốn bỏ thì xoá dòng đó ở tab **Xác nhận** luôn.
+- Chỉ bỏ lời chúc, giữ hồi âm: xoá nội dung ô ở cột **Lời chúc**.
+- Bỏ cả khách đó: chuột phải vào số dòng → **Xoá hàng**.
+
+Lời chúc biến mất khỏi thiệp ngay lần tải trang tiếp theo.
 Đừng sửa hay xoá cột **Mã khách**: thiệp dùng cột này để biết dòng nào của khách nào.
 
 ## Chống spam
@@ -55,5 +55,6 @@ URL ứng dụng web vẫn xem được trên trang thiệp (F12), giống link 
 
 ## Lưu ý
 - Nếu sửa code Apps Script, phải **Triển khai → Quản lý triển khai → Sửa → Phiên bản mới** thì mới có hiệu lực (URL giữ nguyên).
-- Nếu đã chạy `setup` với bản cũ (có cột **Duyệt**), chạy lại `setup` một lần để đổi tiêu đề cột.
-- Chỉ người có quyền vào Sheet mới xem được danh sách hồi âm; khách chỉ thấy các lời chúc trong tab **Lời chúc**.
+- Chạy lại `setup` bất cứ lúc nào cũng an toàn: nó chỉ đặt lại tiêu đề, độ rộng cột và định dạng ngày giờ.
+- Bản cũ có thêm tab **Lời chúc**; bản này không dùng tab đó nữa, anh xoá tab đó đi cũng được.
+- Chỉ người có quyền vào Sheet mới xem được danh sách hồi âm; khách chỉ thấy tên và lời chúc của những dòng có lời chúc.

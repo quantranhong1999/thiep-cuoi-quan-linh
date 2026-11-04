@@ -1,15 +1,16 @@
 // Thiệp cưới Hồng Quân & Khánh Linh — nhận xác nhận tham dự + lời chúc
 // Dán toàn bộ file này vào Apps Script của Google Sheet, chạy hàm setup() một lần, rồi Triển khai dạng Ứng dụng web.
 //
+// - Mọi thứ nằm trong một tab "Xác nhận": mỗi khách một dòng, lời chúc ở cột "Lời chúc".
 // - Mỗi trình duyệt của khách có một "Mã khách". Gửi lại từ cùng trình duyệt thì sửa dòng cũ, không thêm dòng mới.
-// - Lời chúc hiện trên thiệp ngay khi khách gửi. Xoá một dòng trong tab "Lời chúc" là lời chúc đó biến mất khỏi thiệp.
+// - Lời chúc hiện trên thiệp ngay khi khách gửi. Xoá ô lời chúc (hoặc cả dòng) là lời chúc đó biến mất khỏi thiệp.
 
 const TZ = 'Asia/Ho_Chi_Minh';
 const SHEET_RSVP = 'Xác nhận';
-const SHEET_WISH = 'Lời chúc';
-// Cột đầu luôn là thời gian gửi lần đầu, hai cột cuối là "Sửa lúc" và "Mã khách".
+// Cột đầu là thời gian gửi lần đầu, hai cột cuối là "Sửa lúc" và "Mã khách".
 const HEAD_RSVP = ['Thời gian', 'Tên', 'Tham dự', 'Dự tiệc bên', 'Số người', 'Lời chúc', 'Sửa lúc', 'Mã khách'];
-const HEAD_WISH = ['Thời gian', 'Tên', 'Lời chúc', 'Sửa lúc', 'Mã khách'];
+const COL = { time: 1, name: 2, msg: 6, edited: 7, id: 8 };
+const TIME_FORMAT = 'dd/MM/yyyy HH:mm:ss';
 const SIDES = { gai: 'Nhà gái · 28.11', trai: 'Nhà trai · 29.11', ca: 'Cả hai' };
 
 // Chống spam. Khách thật luôn gửi từ trang thiệp; bài gửi bị nghi là spam bị bỏ qua
@@ -20,17 +21,12 @@ const MIN_MS_ON_PAGE = 3000;       // gửi chưa tới 3 giây sau khi mở tra
 
 function setup() {
   const ss = SpreadsheetApp.getActive();
-  const mk = (name, head, widths) => {
-    const sh = ss.getSheetByName(name) || ss.insertSheet(name);
-    sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold').setBackground('#eceee3');
-    sh.setFrozenRows(1);
-    widths.forEach((w, i) => sh.setColumnWidth(i + 1, w));
-    return sh;
-  };
-  mk(SHEET_RSVP, HEAD_RSVP, [150, 180, 80, 150, 80, 420, 150, 110]);
-  const w = mk(SHEET_WISH, HEAD_WISH, [150, 180, 480, 150, 110]);
-  w.getRange('C:C').setWrap(true);
-  w.getRange('D:D').clearDataValidations(); // bản cũ dùng cột này làm ô tick "Duyệt"
+  const sh = ss.getSheetByName(SHEET_RSVP) || ss.insertSheet(SHEET_RSVP);
+  sh.getRange(1, 1, 1, HEAD_RSVP.length).setValues([HEAD_RSVP]).setFontWeight('bold').setBackground('#eceee3');
+  sh.setFrozenRows(1);
+  [150, 180, 80, 150, 80, 420, 150, 110].forEach((w, i) => sh.setColumnWidth(i + 1, w));
+  sh.getRange('F:F').setWrap(true);
+  [COL.time, COL.edited].forEach(c => sh.getRange(2, c, sh.getMaxRows() - 1, 1).setNumberFormat(TIME_FORMAT));
 }
 
 function doPost(e) {
@@ -46,53 +42,49 @@ function doPost(e) {
   lock.waitLock(10000);
   try {
     if (isSpam(d, id, name, msg)) return json({ ok: true });
-    const ss = SpreadsheetApp.getActive();
-    const now = new Date();
     const yes = d.attend === 'yes';
-    upsert(ss.getSheetByName(SHEET_RSVP), HEAD_RSVP, id, now,
+    upsert(SpreadsheetApp.getActive().getSheetByName(SHEET_RSVP), id, new Date(),
       [name, yes ? 'Có' : 'Không', yes ? (SIDES[d.side] || '') : '', yes ? Math.min(20, Number(d.guests) || 1) : 0, msg]);
-    const wish = ss.getSheetByName(SHEET_WISH);
-    if (msg) upsert(wish, HEAD_WISH, id, now, [name, msg]);
-    else remove(wish, HEAD_WISH, id); // khách xoá lời chúc khi sửa hồi âm
     return json({ ok: true });
   } finally {
     lock.releaseLock();
   }
 }
 
-// GET ?action=wishes&me=<mã khách>: mọi lời chúc còn trong tab "Lời chúc", mới nhất trước.
+// GET ?action=wishes&me=<mã khách>: lời chúc của mọi dòng có lời chúc, mới nhất trước.
 // Lời chúc của chính người hỏi được đánh dấu "mine" (mã khách không bao giờ được gửi ra ngoài).
 function doGet(e) {
   const me = String((e && e.parameter && e.parameter.me) || '');
-  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_WISH);
-  const rows = sh && sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_WISH.length).getValues() : [];
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_RSVP);
+  const rows = sh && sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEAD_RSVP.length).getValues() : [];
   const list = rows
-    .filter(r => r[1] && r[2])
+    .filter(r => r[COL.name - 1] && String(r[COL.msg - 1]).trim())
     .reverse()
     .map(r => {
-      const w = { name: String(r[1]), msg: String(r[2]), t: r[0] instanceof Date ? Utilities.formatDate(r[0], TZ, 'dd/MM/yyyy') : '' };
-      if (me && String(r[HEAD_WISH.length - 1]) === me) w.mine = true;
+      const t = r[COL.time - 1];
+      const w = { name: String(r[COL.name - 1]), msg: String(r[COL.msg - 1]), t: t instanceof Date ? Utilities.formatDate(t, TZ, 'dd/MM/yyyy') : '' };
+      if (me && String(r[COL.id - 1]) === me) w.mine = true;
       return w;
     });
   return json(list);
 }
 
 // Ghi [Thời gian, ...values, Sửa lúc, Mã khách]: sửa dòng của khách nếu đã có, không thì thêm dòng mới.
-function upsert(sh, head, id, now, values) {
-  const row = findRow(sh, head, id);
-  if (row) sh.getRange(row, 2, 1, values.length + 1).setValues([values.concat([now])]);
-  else sh.appendRow([now].concat(values, ['', id]));
+function upsert(sh, id, now, values) {
+  const row = findRow(sh, id);
+  if (row) {
+    sh.getRange(row, COL.name, 1, values.length + 1).setValues([values.concat([now])]);
+    sh.getRange(row, COL.edited).setNumberFormat(TIME_FORMAT);
+  } else {
+    sh.appendRow([now].concat(values, ['', id]));
+    sh.getRange(sh.getLastRow(), COL.time).setNumberFormat(TIME_FORMAT);
+  }
 }
 
-function remove(sh, head, id) {
-  const row = findRow(sh, head, id);
-  if (row) sh.deleteRow(row);
-}
-
-function findRow(sh, head, id) {
+function findRow(sh, id) {
   const last = sh.getLastRow();
   if (last < 2) return 0;
-  const cell = sh.getRange(2, head.length, last - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
+  const cell = sh.getRange(2, COL.id, last - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
   return cell ? cell.getRow() : 0;
 }
 
