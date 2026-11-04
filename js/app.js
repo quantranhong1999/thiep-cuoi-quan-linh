@@ -152,7 +152,7 @@
   // ---------- envelope intro ----------
   const intro = $('#intro');
   const autoBtn = $('#auto-btn');
-  let opening = false, sealPulse = null;
+  let opening = false, sealPulse = null, openedAt = 0;
 
   function idleIntro() {
     html.classList.add('locked');
@@ -177,6 +177,7 @@
     if (!userPaused) playMusic(false);
     const done = () => {
       intro.remove();
+      openedAt = performance.now();
       html.classList.remove('locked');
       window.scrollTo(0, 0);
       autoBtn.hidden = false;
@@ -694,6 +695,55 @@
   renderForm();
   loadWishes();
 
+  // ---------- reminder to RSVP ----------
+  // Browsers cannot show our own message when a guest closes the tab (iPhone runs nothing at all), so the card asks
+  // earlier: a moment after the guest reaches the thank-you at the end, or on a computer when the mouse heads for
+  // the tab bar. At most once per visit; never after this browser has sent an RSVP, nor while the form is on screen.
+  const nudge = $('#nudge');
+  const finePointer = !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
+  let nudgeUsed = false, nudgeOpen = false, nudgeTimer = 0, rsvpOnScreen = false;
+  function showNudge() {
+    if (nudgeUsed || rsvp.sent || rsvp.sending || rsvpOnScreen || lbIndex >= 0 || intro.isConnected) return;
+    nudgeUsed = nudgeOpen = true;
+    nudge.hidden = false;
+    html.classList.add('nudge-on');
+    if (fxOn) nudge.animate([{ opacity: 0, transform: 'translateY(40px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 650, easing: EASE });
+  }
+  function hideNudge() {
+    clearTimeout(nudgeTimer);
+    nudgeTimer = 0;
+    if (!nudgeOpen) return;
+    nudgeOpen = false;
+    html.classList.remove('nudge-on');
+    if (!fxOn) { nudge.hidden = true; return; }
+    const a = nudge.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(30px)' }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+    a.onfinish = () => { nudge.hidden = true; a.cancel(); };
+  }
+  $('#nudge-later').addEventListener('click', hideNudge);
+  $('#nudge-go').addEventListener('click', () => {
+    hideNudge();
+    if (auto && auto.on) stopAuto();
+    dockRsvp.click();
+    if (finePointer) try { nameIn.focus({ preventScroll: true }); } catch (e) { /* old Safari */ }
+  });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape' && nudgeOpen) hideNudge(); });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(entries => entries.forEach(en => {
+      rsvpOnScreen = en.isIntersecting;
+      if (rsvpOnScreen) hideNudge();
+    }), { rootMargin: '0px 0px -35% 0px' }).observe($('#hoi-am'));
+    // The thank-you text fully on screen means the guest has seen the whole card.
+    new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.intersectionRatio >= 0.9) { if (!nudgeTimer && !nudgeUsed) nudgeTimer = setTimeout(() => { nudgeTimer = 0; showNudge(); }, 2500); }
+      else { clearTimeout(nudgeTimer); nudgeTimer = 0; }
+    }), { threshold: [0, 0.9] }).observe($('.thankyou-text'));
+  }
+  if (finePointer) {
+    document.addEventListener('mouseout', e => {
+      if (!e.relatedTarget && e.clientY < 8 && openedAt && performance.now() - openedAt > 10000) showNudge();
+    });
+  }
+
   // ---------- gift: copy account number ----------
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
     const num = btn.getAttribute('data-copy');
@@ -720,6 +770,7 @@
   // ---------- boot ----------
   if (C.intro === false) {
     intro.remove();
+    openedAt = performance.now();
     autoBtn.hidden = false;
     startFx();
   } else {
