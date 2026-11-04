@@ -47,6 +47,15 @@
   };
 
   if (C.showLunar === false) $$('.lunar').forEach(el => { el.hidden = true; });
+  if (!fxOn) html.classList.add('no-fx'); // CSS-only motion (calendar pulse) follows the same switch
+
+  // Section dividers: two vine branches meeting at a small diamond; the reveal draws them in.
+  const VINE = '<svg viewBox="0 0 200 36">'
+    + '<path class="vine-branch" d="M4 18 C 30 6, 54 30, 90 18"/><path class="vine-branch" d="M196 18 C 170 6, 146 30, 110 18"/>'
+    + [[24, 12, -32], [46, 23, 28], [70, 16, -22], [176, 12, 32], [154, 23, -28], [130, 16, 22]]
+      .map(([x, y, r]) => '<g transform="rotate(' + r + ' ' + x + ' ' + y + ')"><ellipse class="vine-leaf" cx="' + x + '" cy="' + y + '" rx="6.5" ry="2.6"/></g>').join('')
+    + '<path class="vine-center" d="M100 12.5 L105.5 18 L100 23.5 L94.5 18 Z"/></svg>';
+  $$('.ornament').forEach(o => { o.innerHTML = VINE; });
 
   // ---------- tip bubble ----------
   const tip = $('#tip');
@@ -81,13 +90,21 @@
 
   const cd = { d: $('[data-cd="d"]'), h: $('[data-cd="h"]'), m: $('[data-cd="m"]'), s: $('[data-cd="s"]') };
   const cdNote = $('#cd-note');
+  let cdTicks = 0;
+  // A digit that changes flips down like a desk calendar (not on the first fill).
+  function setDigit(el, v) {
+    if (el.textContent === v) return;
+    el.textContent = v;
+    if (fxOn && cdTicks && document.visibilityState === 'visible') el.animate([{ transform: 'perspective(320px) rotateX(-90deg)', opacity: 0.3 }, { transform: 'none', opacity: 1 }], { duration: 480, easing: 'cubic-bezier(.2,.7,.3,1.25)' });
+  }
   function tickCountdown() {
     const now = Date.now(), ms = Math.max(0, WEDDING - now);
     const pad = n => String(n).padStart(2, '0');
-    cd.d.textContent = Math.floor(ms / 864e5);
-    cd.h.textContent = pad(Math.floor(ms / 36e5) % 24);
-    cd.m.textContent = pad(Math.floor(ms / 6e4) % 60);
-    cd.s.textContent = pad(Math.floor(ms / 1e3) % 60);
+    setDigit(cd.d, String(Math.floor(ms / 864e5)));
+    setDigit(cd.h, pad(Math.floor(ms / 36e5) % 24));
+    setDigit(cd.m, pad(Math.floor(ms / 6e4) % 60));
+    setDigit(cd.s, pad(Math.floor(ms / 1e3) % 60));
+    cdTicks++;
     cdNote.textContent = now >= WEDDING ? 'Chúng mình đã về chung một nhà ♥' : 'đến ngày chung đôi';
   }
   tickCountdown();
@@ -164,12 +181,32 @@
     const ease = 'cubic-bezier(.65,0,.35,1)';
     if (sealPulse) sealPulse.cancel();
     q('seal').animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(1.35) rotate(-12deg)', opacity: 0 }], { duration: 450, easing: 'ease-in', fill: 'forwards' });
+    sealBurst(q('seal'));
     q('flap').animate([{ transform: 'rotateX(0deg)', zIndex: 2 }, { transform: 'rotateX(180deg)', zIndex: 0 }], { duration: 800, delay: 250, easing: ease, fill: 'forwards' });
     q('card').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-62%)' }], { duration: 900, delay: 850, easing: ease, fill: 'forwards' });
     [q('top'), q('bottom')].forEach(n => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, delay: 300, fill: 'forwards' }));
     const out = intro.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.15)' }], { duration: 800, delay: 1750, easing: 'ease-in', fill: 'forwards' });
     setTimeout(startFx, 1450); // start the cover reveals while the envelope fades, so the cover is never blank
     out.onfinish = done;
+  }
+
+  // The seal breaks into leaves that fly out and drift down.
+  function sealBurst(seal) {
+    const box = intro.getBoundingClientRect(), r = seal.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - box.left, cy = r.top + r.height / 2 - box.top;
+    const colors = ['#8fa37f', '#c5d1b4', '#5f7853', '#dfe7cd'];
+    for (let i = 0; i < 24; i++) {
+      const p = document.createElement('span');
+      const sz = 8 + Math.random() * 8, a = Math.random() * Math.PI * 2, d = 70 + Math.random() * 120, rot = (Math.random() - 0.5) * 720;
+      Object.assign(p.style, { position: 'absolute', left: (cx - sz / 2) + 'px', top: (cy - sz * 0.7) + 'px', width: sz + 'px', height: (sz * 1.4) + 'px', background: colors[i % colors.length], borderRadius: '80% 0 80% 0', pointerEvents: 'none', zIndex: '4' });
+      intro.appendChild(p);
+      const tx = Math.cos(a) * d, ty = Math.sin(a) * d;
+      p.animate([
+        { transform: 'translate(0,0) rotate(0deg) scale(.4)', opacity: 1 },
+        { transform: 'translate(' + (tx * 0.75).toFixed(0) + 'px,' + (ty * 0.75).toFixed(0) + 'px) rotate(' + (rot / 2).toFixed(0) + 'deg) scale(1)', opacity: 1, offset: 0.45 },
+        { transform: 'translate(' + tx.toFixed(0) + 'px,' + (ty + 90).toFixed(0) + 'px) rotate(' + rot.toFixed(0) + 'deg) scale(.8)', opacity: 0 },
+      ], { duration: 1100 + Math.random() * 500, easing: 'cubic-bezier(.15,.6,.3,1)', fill: 'forwards' });
+    }
   }
 
   // ---------- reveals, petals, parallax, progress ----------
@@ -210,6 +247,14 @@
       });
       $$('[data-reveal]', root).forEach(el => {
         const k = el.getAttribute('data-reveal');
+        if (k === 'vine') { // draw both branches from their outer ends, then leaves and the diamond pop in
+          const parts = [];
+          $$('.vine-branch', el).forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; parts.push(mk(p, [{ strokeDashoffset: L }, { strokeDashoffset: 0 }], 1400)); });
+          $$('.vine-leaf', el).forEach((l, i) => parts.push(mk(l, [{ opacity: 0, transform: 'scale(0)' }, { opacity: 0.85, transform: 'scale(1.2)', offset: 0.7 }, { opacity: 0.85, transform: 'none' }], 550, 250 + (i % 3) * 300)));
+          $$('.vine-center', el).forEach(c => parts.push(mk(c, [{ opacity: 0, transform: 'scale(0) rotate(-90deg)' }, { opacity: 1, transform: 'none' }], 600, 1150)));
+          pending.set(el, parts);
+          return;
+        }
         const list = [mk(el, FX[k] || FX.up, DUR[k] || 1000)];
         if (k === 'wipe') { const im = $('img', el); if (im) list.push(mk(im, [{ transform: 'scale(1.3)' }, { transform: 'none' }], 2200)); }
         pending.set(el, list);

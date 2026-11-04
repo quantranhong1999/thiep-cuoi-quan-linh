@@ -87,9 +87,12 @@ h1, h2, p, figure { margin: 0; }
   color: var(--muted);
   text-wrap: balance;
 }
-.ornament { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--accent); margin-top: 6px; }
-.ornament::before, .ornament::after { content: ""; width: 56px; height: 1px; background: currentColor; }
-.ornament span { width: 7px; height: 7px; border: 1px solid currentColor; transform: rotate(45deg); }
+/* section divider: a vine drawn from both ends towards a small diamond (built in app.js) */
+.ornament { display: flex; justify-content: center; color: var(--accent); margin-top: 6px; }
+.ornament svg { display: block; width: 176px; height: 32px; overflow: visible; }
+.vine-branch { fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; }
+.vine-leaf { fill: currentColor; opacity: .85; transform-box: fill-box; transform-origin: center; }
+.vine-center { fill: none; stroke: currentColor; transform-box: fill-box; transform-origin: center; }
 
 .section { padding: var(--sec-pad); }
 .sec-head { text-align: center; display: grid; gap: 6px; justify-items: center; margin-bottom: clamp(32px, 6cqi, 64px); }
@@ -341,10 +344,15 @@ h1, h2, p, figure { margin: 0; }
 .cal-d.gai, .cal-d.trai { color: var(--paper); font-weight: 600; }
 .cal-d.gai { background: var(--accent); }
 .cal-d.trai { background: var(--primary); }
+.cal-d.gai, .cal-d.trai { position: relative; }
+.cal-d.gai::after, .cal-d.trai::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); animation: day-pulse 2.4s ease-out infinite; pointer-events: none; }
+.cal-d.trai::after { border-color: var(--primary); animation-delay: 1.2s; }
+@keyframes day-pulse { 0% { transform: scale(1); opacity: .75; } 70%, 100% { transform: scale(1.65); opacity: 0; } }
+html.no-fx .cal-d::after { display: none; }
 .countdown-col { text-align: center; display: grid; gap: 14px; justify-items: center; }
 .countdown { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1.5cqi, 12px); width: min(100%, 460px); }
 .cd-tile { background: var(--primary); color: var(--paper); padding: 18px 4px 12px; display: grid; gap: 4px; border-radius: 999px 999px 0 0; }
-.cd-tile b { font-family: var(--f-serif); font-weight: 400; font-size: clamp(26px, 6cqi, 40px); line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
+.cd-tile b { font-family: var(--f-serif); font-weight: 400; font-size: clamp(26px, 6cqi, 40px); line-height: 1; font-variant-numeric: lining-nums tabular-nums; transform-origin: 50% 60%; }
 .cd-tile span { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--on-dark); }
 .cd-note { font-family: var(--f-script); font-size: clamp(34px, 7cqi, 48px); line-height: 1.2; color: var(--accent); }
 
