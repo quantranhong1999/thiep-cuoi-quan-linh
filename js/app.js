@@ -456,7 +456,7 @@
       setErr('');
       renderForm();
       // Apps Script answers with a redirect, so the POST is fire-and-forget (opaque response): network success = sent.
-      fetch(C.sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ msg }, r)) })
+      fetch(C.sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ msg, hp: $('#rsvp-hp').value, ms: Math.round(performance.now()) }, r)) })
         .then(() => {
           store.set('rsvp', r);
           rsvp.sending = false;

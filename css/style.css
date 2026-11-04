@@ -362,7 +362,8 @@ h1, h2, p, figure { margin: 0; }
 .rsvp-title { font-family: var(--f-serif); font-weight: 400; font-size: clamp(32px, 7cqi, 64px); line-height: 1.1; color: var(--primary); }
 .rsvp-title .script { display: inline-block; font-size: 1.45em; line-height: .75; color: var(--accent); padding: 0 .08em; }
 .rsvp-sub { margin: 10px 0 28px; color: var(--muted-2); }
-.rsvp-form { display: grid; gap: 18px; }
+.rsvp-form { position: relative; display: grid; gap: 18px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; } /* spam trap, filled only by bots */
 .field-line { border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: transparent; padding: 10px 0; font-size: 18px; outline: none; }
 .field-line:focus { border-bottom-color: var(--accent); }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }

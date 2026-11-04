@@ -2,7 +2,7 @@
 
 Trang tĩnh (HTML, CSS, JS thuần, không cần build), dựng từ gói `design_handoff_thiep_cuoi`, đổi sang tông xanh rêu.
 
-- Thiệp: https://quantranhong1999.github.io/thiep-cuoi-quan-linh/ (GitHub Pages, nhánh `main`, thư mục gốc)
+- Thiệp: https://quantranhong1999.github.io/thiep-cuoi-quan-linh/ (GitHub Pages, đăng bằng GitHub Actions mỗi lần push lên `main`)
 - Bản demo (Claude Artifact, có lời chúc mẫu): https://claude.ai/artifact/7rMGnvD9TYHz12qaFexiD8
 
 ## Cấu trúc
@@ -16,6 +16,7 @@ Trang tĩnh (HTML, CSS, JS thuần, không cần build), dựng từ gói `desig
 | `assets/` | Ảnh đã nén (bản gốc + bản 640px), mã QR, nhạc 128 kbps, ảnh xem trước `og.jpg` |
 | `google-sheets/` | Apps Script nhận hồi âm + lời chúc, và hướng dẫn cài |
 | `scripts/optimize-assets.sh` | Tạo lại `assets/` từ gói bàn giao và thư mục `Ảnh cưới` (danh sách ảnh dùng trên thiệp ở đầu script, cần ffmpeg) |
+| `scripts/build-site.mjs`, `.github/workflows/pages.yml` | Đăng lên GitHub Pages: chép trang vào `_site/` và chèn URL Google Sheets từ secret `SHEET_URL` |
 | `scripts/build-artifact.mjs` | Tạo `dist-artifact/index.html` cho bản demo trên Claude Artifact (bật lời chúc mẫu) |
 
 ## Chạy thử trên máy
@@ -30,12 +31,13 @@ Mở http://localhost:5173. Khi chưa có `sheetUrl`, hồi âm và lời chúc 
 
 ## Cập nhật thiệp
 
-Sửa file, commit rồi push lên `main`. GitHub Pages tự đăng lại sau khoảng một phút.
+Sửa file, commit rồi push lên `main`. GitHub Actions tự đăng lại sau khoảng một phút.
+Để `sheetUrl` trong `js/config.js` luôn trống trong repo; URL thật nằm ở secret `SHEET_URL`.
 Trình duyệt của khách có thể giữ bản cũ thêm tối đa 10 phút.
 
 ## Việc còn lại trước khi gửi khách
 
-- Cài Google Sheets theo `google-sheets/Huong-dan.md`, dán URL vào `sheetUrl` trong `js/config.js`.
+- Cài Google Sheets theo `google-sheets/Huong-dan.md` và lưu URL ứng dụng web vào secret `SHEET_URL` của repo.
   Khi chưa có `sheetUrl`, hồi âm và lời chúc của khách chỉ nằm trong trình duyệt của khách, cô dâu chú rể không nhận được.
 
 Ghi chú: mã QR cô dâu chứa tài khoản ảo MB `VQRQANHPB1802` (mã tham chiếu `NPS6869`), không phải số `01602486663322`
