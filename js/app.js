@@ -33,7 +33,6 @@
     { name: 'Tuấn Anh', msg: 'Cuối cùng cũng đợi được ngày này. Chúc hai bạn luôn hạnh phúc như ngày đầu.', t: '29/10/2026' },
     { name: 'Minh Anh', msg: 'Chúc hai bạn trăm năm hạnh phúc, sớm có tin vui nhé!', t: '28/10/2026' },
   ];
-  const AVATAR_BG = ['#5d6a57', '#7a8b67', '#34432f', '#8fa37f', '#6b7f73', '#8a8f6a'];
 
   const $ = (sel, el) => (el || document).querySelector(sel);
   const $$ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
@@ -518,8 +517,18 @@
     if (b.hasAttribute('data-attend')) rsvp.attend = b.getAttribute('data-attend');
     else if (b.hasAttribute('data-side')) rsvp.side = b.getAttribute('data-side');
     else if (b.hasAttribute('data-step')) rsvp.guests = Math.min(10, Math.max(1, rsvp.guests + +b.getAttribute('data-step')));
+    else if (b.hasAttribute('data-emoji')) { insertEmoji(b.getAttribute('data-emoji')); return; }
     renderForm();
   });
+  // Quick emoji buttons (phone keyboards have emoji anyway; this helps on computers).
+  let caret = null; // where the guest last left the cursor in the wish box
+  ['keyup', 'click', 'select', 'input'].forEach(t => msgIn.addEventListener(t, () => { caret = [msgIn.selectionStart, msgIn.selectionEnd]; }));
+  function insertEmoji(emoji) {
+    const [a, b] = caret || [msgIn.value.length, msgIn.value.length];
+    if (msgIn.value.length - (b - a) + emoji.length > msgIn.maxLength) return;
+    msgIn.setRangeText(emoji, a, b, 'end');
+    caret = [msgIn.selectionStart, msgIn.selectionEnd];
+  }
   nameIn.addEventListener('input', () => setErr(''));
   $('#rsvp-edit').addEventListener('click', () => { thanks.hidden = true; form.hidden = false; nameIn.focus(); });
 
@@ -536,7 +545,7 @@
       setErr('');
       if (!edited) burst();
       showThanks(r, true);
-      setMine(msg ? { name, msg, t: today() } : null, edited);
+      setMine(msg ? { name, msg, t: today() } : null);
       renderForm();
     };
     // No sheet configured: keep everything in this browser (for trying the card out).
@@ -555,9 +564,11 @@
       });
   });
 
-  // Wishes read like a chat: older ones sit above as history, the latest pop in one by one after a typing indicator.
-  const chatBox = $('#wishes'), chatBody = $('#wishes-track');
-  let chatQueue = [], chatTimer = 0, chatTyping = null, chatInView = false;
+  // Wishes: a white guestbook, newest first. Each wish is a small card "placed down" as it scrolls into view.
+  const book = $('#wishes'), bookList = $('#wishes-track'), moreBtn = $('#wishes-more');
+  const PAGE = 6;
+  const EMOJI = /(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\p{Emoji_Modifier})*)/u;
+  let shown = PAGE;
 
   function el(cls, text) {
     const d = document.createElement('div');
@@ -565,123 +576,92 @@
     if (text) d.textContent = text;
     return d;
   }
-  function avatarOf(name) {
-    const words = name.trim().split(/\s+/);
-    const a = el('msg-avatar', (words[words.length - 1] || '?').charAt(0).toUpperCase());
+  function noteEl(w) {
+    const card = document.createElement('article');
+    card.className = 'note' + (w.mine ? ' is-mine' : '');
+    card.setAttribute('role', 'listitem');
     let h = 0;
-    for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
-    a.style.background = AVATAR_BG[h % AVATAR_BG.length];
-    a.setAttribute('aria-hidden', 'true');
-    return a;
+    for (const ch of w.name + w.msg) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+    card._tilt = ((h % 13) - 6) / 10; // a steady -0.6°..0.6° tilt, like cards laid by hand
+    card.style.transform = 'rotate(' + card._tilt + 'deg)';
+    if (w.mine) card.appendChild(el('note-mine', 'Lời chúc của bạn'));
+    const msg = document.createElement('p');
+    msg.className = 'note-msg';
+    msg.append('“');
+    String(w.msg).split(EMOJI).forEach((part, k) => {
+      if (!part) return;
+      if (k % 2) { const e = document.createElement('span'); e.className = 'emo'; e.textContent = part; msg.appendChild(e); }
+      else msg.append(part);
+    });
+    msg.append('”');
+    const foot = el('note-foot');
+    foot.append(el('note-date', w.t || ''), el('note-sig', w.name));
+    card.append(msg, foot);
+    return card;
   }
-  function msgEl(w, mine, status) {
-    const row = el('msg' + (mine ? ' msg-me' : ''));
-    const col = el('msg-col');
-    const bubble = el('msg-bubble', w.msg);
-    if (status || w.t) bubble.appendChild(el('msg-time', status || w.t));
-    if (!mine) {
-      const heart = el('msg-heart', '♥'); // the couple "liked" every wish
-      heart.setAttribute('aria-hidden', 'true');
-      bubble.appendChild(heart);
-    }
-    col.append(el('msg-name', w.name), bubble);
-    row.append(avatarOf(w.name), col);
-    return row;
-  }
-  function rowFor(w) { return msgEl(w, !!w.mine, w.mine ? 'Lời chúc của bạn' : ''); }
-  function nearBottom() { return chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 80; }
-  function toBottom() {
-    if (chatBody.scrollTo) chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: fxOn ? 'smooth' : 'auto' });
-    else chatBody.scrollTop = chatBody.scrollHeight;
-  }
-  function popIn(row, mine) {
+  function placeNote(card, delay) {
+    card.classList.remove('is-pending');
     if (!fxOn) return;
-    const bubble = $('.msg-bubble', row), heart = $('.msg-heart', row);
-    row.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: EASE });
-    bubble.style.transformOrigin = mine ? '100% 100%' : '0 100%';
-    bubble.animate([{ transform: 'scale(.6)' }, { transform: 'scale(1.04)', offset: 0.65 }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.2,.8,.3,1)' });
-    if (heart) heart.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 1, transform: 'scale(1.35)', offset: 0.6 }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 700, easing: EASE, fill: 'backwards' });
+    const r = card._tilt;
+    card.animate([{ opacity: 0, transform: 'translateY(36px) rotate(' + (r - 4) + 'deg) scale(.96)' }, { opacity: 1, transform: 'rotate(' + r + 'deg)' }], { duration: 900, delay, easing: EASE, fill: 'backwards' });
   }
-  function chatStep() {
-    chatTimer = 0;
-    if (!chatInView || !chatQueue.length) return; // resumes when the chat scrolls back into view
-    const w = chatQueue.shift();
-    const stick = nearBottom();
-    if (w.mine) { // the guest's own wish needs no typing indicator
-      const row = rowFor(w);
-      chatBody.appendChild(row);
-      popIn(row, true);
-      if (stick) toBottom();
-      chatTimer = setTimeout(chatStep, 900);
-      return;
-    }
-    chatTyping = el('msg');
-    const dots = el('msg-bubble typing');
-    dots.innerHTML = '<i></i><i></i><i></i>';
-    chatTyping.append(avatarOf(w.name), dots);
-    chatBody.appendChild(chatTyping);
-    chatTyping.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: EASE });
-    if (stick) toBottom();
-    chatTimer = setTimeout(() => {
-      const row = msgEl(w);
-      const stick2 = nearBottom();
-      chatTyping.replaceWith(row);
-      chatTyping = null;
-      popIn(row, false);
-      if (stick2) toBottom();
-      chatTimer = setTimeout(chatStep, 1400);
-    }, 900 + Math.min(900, w.msg.length * 12)); // longer wishes "type" a little longer
+  const noteIO = fxOn && 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    let i = 0;
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      noteIO.unobserve(en.target);
+      placeNote(en.target, (i++) * 180);
+    });
+  }, { threshold: 0.15 }) : null;
+  function addNote(w) {
+    const card = noteEl(w);
+    if (noteIO) { card.classList.add('is-pending'); noteIO.observe(card); }
+    bookList.appendChild(card);
   }
-  function flushChat() {
-    clearTimeout(chatTimer);
-    chatTimer = 0;
-    if (chatTyping) { chatTyping.remove(); chatTyping = null; }
-    chatQueue.splice(0).forEach(w => chatBody.appendChild(rowFor(w)));
-  }
-  function playChat() { if (chatInView && !chatTimer && !chatTyping && chatQueue.length) chatStep(); }
   const showSamples = !C.sheetUrl && C.sampleWishes;
-  function chatList() { return showSamples ? wishes.concat(SAMPLE_WISHES) : wishes; }
+  function allWishes() { return showSamples ? wishes.concat(SAMPLE_WISHES) : wishes; }
+  function updateMore(total) {
+    const rest = total - Math.min(shown, total);
+    moreBtn.hidden = rest <= 0;
+    moreBtn.textContent = 'Xem thêm ' + Math.min(PAGE, rest) + ' lời chúc';
+  }
   function renderWishes() {
-    clearTimeout(chatTimer);
-    chatTimer = 0;
-    chatTyping = null;
-    const list = chatList().slice().reverse(); // oldest first, like a chat
-    chatBox.hidden = !list.length;
+    const list = allWishes();
+    book.hidden = !list.length;
     $('#wishes-demo').hidden = !showSamples;
     $('#wishes-count').textContent = list.length + ' lời chúc';
-    chatBody.textContent = '';
-    const live = fxOn ? Math.min(list.length, 6) : 0;
-    list.slice(0, list.length - live).forEach(w => chatBody.appendChild(rowFor(w)));
-    chatQueue = list.slice(list.length - live);
-    chatBody.scrollTop = chatBody.scrollHeight;
-    playChat();
+    bookList.textContent = '';
+    list.slice(0, shown).forEach(addNote);
+    updateMore(list.length);
   }
-  // The guest's own wish sits on the right, like a message they sent; sending again edits or removes it.
-  function setMine(w, edited) {
-    flushChat();
+  moreBtn.addEventListener('click', () => {
+    const list = allWishes();
+    list.slice(shown, shown + PAGE).forEach(addNote);
+    shown += PAGE;
+    updateMore(list.length);
+  });
+  // The guest's own wish is tagged "Lời chúc của bạn"; sending again edits or removes it.
+  function setMine(w) {
     const i = wishes.findIndex(x => x.mine);
     if (w) {
       w.mine = true;
       if (i >= 0) wishes[i] = Object.assign({}, wishes[i], { name: w.name, msg: w.msg });
-      else wishes.unshift(w);
+      else { wishes.unshift(w); shown++; } // the new card takes a slot at the top
     } else if (i >= 0) {
       wishes.splice(i, 1);
+      if (i < shown) shown--;
     }
     if (!C.sheetUrl) store.set('wishes', wishes);
-    const total = chatList().length;
-    chatBox.hidden = !total;
+    const total = allWishes().length;
+    book.hidden = !total;
     $('#wishes-count').textContent = total + ' lời chúc';
-    const old = $('.msg-me', chatBody);
+    updateMore(total);
+    const old = $('.note.is-mine', bookList);
     if (!w) { if (old) old.remove(); return; }
-    const row = msgEl(w, true, edited && old ? 'Vừa sửa' : 'Vừa gửi');
-    if (old) old.replaceWith(row);
-    else { chatBody.appendChild(row); toBottom(); }
-    popIn(row, true);
-  }
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(entries => { chatInView = entries.some(e => e.isIntersecting); playChat(); }, { threshold: 0.3 }).observe(chatBox);
-  } else {
-    chatInView = true;
+    const card = noteEl(wishes[i >= 0 ? i : 0]);
+    if (old) old.replaceWith(card);
+    else bookList.prepend(card);
+    placeNote(card, 0);
   }
 
   function loadWishes() {

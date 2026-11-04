@@ -292,6 +292,16 @@
         </div>
       </div>
       <textarea id="rsvp-msg" class="field-box" name="msg" rows="3" maxlength="1000" placeholder="Lời chúc cho cô dâu chú rể (không bắt buộc)" aria-label="Lời chúc"></textarea>
+      <div class="emoji-row" role="group" aria-label="Thêm biểu tượng cảm xúc vào lời chúc">
+        <button type="button" data-emoji="❤️" aria-label="Trái tim">❤️</button>
+        <button type="button" data-emoji="🥰" aria-label="Mặt cười thương yêu">🥰</button>
+        <button type="button" data-emoji="😍" aria-label="Mắt trái tim">😍</button>
+        <button type="button" data-emoji="🎉" aria-label="Pháo giấy">🎉</button>
+        <button type="button" data-emoji="🥂" aria-label="Cụng ly">🥂</button>
+        <button type="button" data-emoji="💐" aria-label="Bó hoa">💐</button>
+        <button type="button" data-emoji="💍" aria-label="Nhẫn cưới">💍</button>
+        <button type="button" data-emoji="🙏" aria-label="Chắp tay">🙏</button>
+      </div>
       <div id="rsvp-err" class="rsvp-err" role="alert" hidden></div>
       <button type="submit" class="btn-submit" data-submit>Gửi hồi âm</button>
     </form>
@@ -303,16 +313,15 @@
     </div>
   </div>
   <div class="wishes" id="wishes" hidden>
-    <div class="chat">
-      <div class="chat-head">
-        <div class="chat-badge script" aria-hidden="true">Q&amp;L</div>
-        <div>
-          <div class="chat-title">Lời chúc gửi Quân &amp; Linh</div>
-          <div class="chat-sub" id="wishes-count"></div>
-        </div>
+    <div class="book">
+      <div class="book-head">
+        <div class="kicker">Sổ lưu bút</div>
+        <div class="book-title">Lời chúc gửi Quân&nbsp;&amp;&nbsp;Linh</div>
+        <div class="book-count" id="wishes-count"></div>
       </div>
-      <div class="chat-body" id="wishes-track" role="log" aria-label="Lời chúc của khách" tabindex="0"></div>
-      <div class="chat-demo" id="wishes-demo" hidden>Lời chúc mẫu để xem thử. Khi nối Google Sheets, khung này sẽ hiện lời chúc thật của khách.</div>
+      <div class="book-list" id="wishes-track" role="list" aria-label="Lời chúc của khách"></div>
+      <button type="button" class="link-btn book-more" id="wishes-more" hidden></button>
+      <div class="book-demo" id="wishes-demo" hidden>Lời chúc mẫu để xem thử. Khi nối Google Sheets, sổ này sẽ hiện lời chúc thật của khách.</div>
     </div>
   </div>
 </section>
