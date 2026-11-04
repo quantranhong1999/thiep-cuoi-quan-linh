@@ -412,11 +412,11 @@ html.no-fx .cal-heart { animation: none; }
 .book-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); align-items: start; gap: 18px; } /* one column on phones, two on wide screens */
 .note { position: relative; background: #fff; border: 1px solid rgba(52, 67, 47, .2); outline: 1px solid rgba(52, 67, 47, .12); outline-offset: -5px; padding: 20px 20px 12px; box-shadow: 0 8px 22px rgba(34, 41, 31, .07); }
 .note.is-pending { opacity: 0; }
-.note-msg { margin: 0; font-family: var(--f-serif); font-style: italic; font-size: 16px; line-height: 1.65; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
-.note-msg .emo { font-style: normal; } /* emoji stay upright inside italic text */
-.note-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 6px; }
-.note-date { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; padding-bottom: 6px; }
-.note-sig { min-width: 0; font-family: var(--f-script); font-size: 27px; line-height: 1.2; color: var(--primary); text-align: right; overflow-wrap: anywhere; }
+.note-msg { margin: 0; font-family: var(--f-serif); font-size: 17px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-top: 12px; }
+.note-date { flex: none; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note-sig { min-width: 0; margin-left: auto; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); text-align: right; overflow-wrap: anywhere; }
+.note-sig::before { content: "— "; }
 .note-mine { position: absolute; top: -10px; left: 16px; background: var(--accent); color: var(--paper); font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
 .book-more { display: block; margin: 22px auto 0; }
 .book-demo { margin-top: 18px; font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
