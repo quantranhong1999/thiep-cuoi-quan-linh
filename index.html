@@ -324,8 +324,28 @@
     <div class="lede" data-reveal="up">Sự hiện diện của bạn là món quà quý nhất. Nếu ở xa, bạn có thể gửi lời chúc qua đây.</div>
     <div class="ornament" data-reveal="vine" aria-hidden="true"></div>
   </div>
-  <div class="gift-grid">
-    <div class="gift-card" data-reveal="up">
+  <button type="button" class="giftbox" id="giftbox" data-reveal="up" aria-expanded="false" aria-controls="gift-panel">
+    <svg viewBox="0 24 220 152" aria-hidden="true">
+      <defs><linearGradient id="gb-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#506449"/><stop offset="1" stop-color="#37472f"/></linearGradient></defs>
+      <g class="gb-card">
+        <rect x="62" y="74" width="96" height="62" fill="#fff" stroke="#c5d1b4"/>
+        <path d="M110 112 C 94 101, 100 90, 110 97 C 120 90, 126 101, 110 112 Z" fill="#5d6a57"/>
+      </g>
+      <rect x="34" y="82" width="152" height="90" rx="2" fill="url(#gb-body)"/>
+      <rect x="34" y="82" width="152" height="9" fill="#22291f" opacity=".28"/>
+      <rect x="98" y="82" width="24" height="90" fill="#dfe7cd"/>
+      <g class="gb-lid">
+        <rect x="24" y="56" width="172" height="30" rx="2" fill="#5f7853"/>
+        <rect x="98" y="56" width="24" height="30" fill="#eef2e3"/>
+        <path d="M110 54 C 94 26, 58 22, 58 42 C 58 58, 92 60, 110 54 Z" fill="#dfe7cd" stroke="#b9c7a7"/>
+        <path d="M110 54 C 126 26, 162 22, 162 42 C 162 58, 128 60, 110 54 Z" fill="#dfe7cd" stroke="#b9c7a7"/>
+        <rect x="100" y="46" width="20" height="15" rx="4" fill="#eef2e3" stroke="#b9c7a7"/>
+      </g>
+    </svg>
+    <span class="kicker giftbox-hint" id="giftbox-hint">Chạm để mở hộp quà</span>
+  </button>
+  <div class="gift-grid" id="gift-panel" hidden>
+    <div class="gift-card">
       <div class="kicker">Chú rể · Hồng Quân</div>
       <img class="qr" src="assets/qr-groom.png" width="200" height="200" alt="Mã QR chuyển khoản cho chú rể Hồng Quân" loading="lazy">
       <div class="gift-bank">CAKE by VPBank</div>
@@ -333,7 +353,7 @@
       <div class="gift-holder">Trần Hồng Quân</div>
       <button type="button" class="copy-btn" data-copy="0965697012">Sao chép số TK</button>
     </div>
-    <div class="gift-card" data-reveal="up">
+    <div class="gift-card">
       <div class="kicker">Cô dâu · Khánh Linh</div>
       <img class="qr" src="assets/qr-bride.png" width="200" height="200" alt="Mã QR chuyển khoản cho cô dâu Khánh Linh" loading="lazy">
       <div class="gift-bank">MB Bank</div>

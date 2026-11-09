@@ -428,6 +428,20 @@ html.no-fx .cal-heart { animation: none; }
 
 /* ---------- 12. gift ---------- */
 .gift { max-width: 1000px; margin: 0 auto; }
+/* The QR codes stay inside the box until a guest opens it: the lid flies off and a small card rises. */
+.giftbox { display: grid; gap: 14px; justify-items: center; margin: 0 auto; padding: 8px 16px; background: none; border: 0; color: inherit; cursor: pointer; }
+.giftbox svg { display: block; width: clamp(170px, 48cqi, 230px); height: auto; overflow: visible; transform-origin: 50% 90%; }
+.giftbox[aria-expanded="false"] svg { animation: gift-shake 4.5s ease-in-out infinite; }
+.gb-lid, .gb-card { transform-box: fill-box; transform-origin: center; }
+.gb-lid { transition: transform .7s var(--ease), opacity .45s ease .3s; }
+.gb-card { transition: transform .7s var(--ease) .25s; }
+.giftbox[aria-expanded="true"] .gb-lid { transform: translate(34px, -74px) rotate(18deg); opacity: 0; }
+.giftbox[aria-expanded="true"] .gb-card { transform: translateY(-42px); }
+.giftbox-hint { color: var(--accent); }
+@keyframes gift-shake { 0%, 82%, 100% { transform: none; } 86% { transform: rotate(-4deg); } 90% { transform: rotate(4deg); } 94% { transform: rotate(-2.5deg); } 97% { transform: rotate(1.5deg); } }
+html.no-fx .giftbox svg { animation: none !important; }
+html.no-fx .gb-lid, html.no-fx .gb-card { transition: none; }
+#gift-panel { margin-top: 28px; scroll-margin-top: 20px; }
 .gift-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: clamp(16px, 3cqi, 28px); }
 .gift-card { background: var(--panel); border: 1px solid var(--line); outline: 1px solid var(--line); outline-offset: -8px; padding: 34px 24px; display: grid; gap: 10px; justify-items: center; text-align: center; }
 .qr { width: 200px; height: 200px; background: #fff; padding: 10px; display: block; object-fit: contain; }

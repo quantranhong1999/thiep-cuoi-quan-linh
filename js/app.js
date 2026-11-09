@@ -333,10 +333,9 @@
     }
   }
 
-  function burst() {
+  function burst(from) {
     if (!fxOn) return;
-    const btn = $('[data-submit]');
-    const r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const r = from.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const layer = document.createElement('div');
     Object.assign(layer.style, { position: 'fixed', left: '0', top: '0', right: '0', bottom: '0', pointerEvents: 'none', zIndex: '90', overflow: 'hidden' });
     document.body.appendChild(layer);
@@ -546,7 +545,7 @@
       rsvp.sent = true;
       store.set('rsvp', r);
       setErr('');
-      if (!edited) burst();
+      if (!edited) burst(submitBtn);
       showThanks(r, true);
       setMine(msg ? { name, msg, t: today() } : null);
       renderForm();
@@ -745,6 +744,20 @@
       if (!e.relatedTarget && e.clientY < 8 && openedAt && performance.now() - openedAt > 10000) showNudge();
     });
   }
+
+  // ---------- gift box: the QR codes stay inside until a guest opens it ----------
+  const giftBox = $('#giftbox'), giftPanel = $('#gift-panel'), giftHint = $('#giftbox-hint');
+  giftBox.addEventListener('click', () => {
+    const open = giftPanel.hidden;
+    giftPanel.hidden = !open;
+    giftBox.setAttribute('aria-expanded', String(open));
+    giftHint.textContent = open ? 'Đóng hộp quà' : 'Chạm để mở hộp quà';
+    if (!open) return;
+    if (auto && auto.on) stopAuto(); // the page must hold still while a guest scans or copies
+    burst($('svg', giftBox));
+    if (fxOn) $$('.gift-card', giftPanel).forEach((c, i) => c.animate(FX.up, { duration: 900, delay: 350 + i * 140, easing: EASE, fill: 'backwards' }));
+    setTimeout(() => giftPanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }), fxOn ? 700 : 0);
+  });
 
   // ---------- gift: copy account number ----------
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
