@@ -46,6 +46,11 @@ for entry in "${photos[@]}"; do
   ffmpeg -loglevel error -y -i "$f" -vf scale=640:-2:flags=lanczos -q:v 5 "$out/img/$name-640.jpg"
 done
 
+# Thumbnails for the strip under the large album photo.
+for name in tey00241 n04 p07 p15c p13 tey00811 tey00773 tey00844 p16 p17 tey00934 n01; do
+  ffmpeg -loglevel error -y -i "$out/img/$name.jpg" -vf scale=240:-2:flags=lanczos -q:v 6 "$out/img/$name-240.jpg"
+done
+
 # Link preview (Zalo / Messenger / Facebook): 1.91:1 band around the faces of the cover photo.
 ffmpeg -loglevel error -y -i "$src/p03-hero.jpg" -vf "crop=888:466:0:200" -q:v 3 "$out/og.jpg"
 

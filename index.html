@@ -224,7 +224,7 @@
   </div>
 </section>
 
-<!-- 9. Album: a short mosaic of five photos and a "see more" tile; the viewer shows all twelve. Each photo appears once on the page. -->
+<!-- 9. Album: one large photo with arrows and a strip of all twelve photos, couple photos first. Each photo appears once on the page. -->
 <section class="section album">
   <div class="sec-head">
     <div class="kicker" data-reveal="fade">Album ảnh cưới</div>
@@ -232,20 +232,26 @@
     <div class="lede" data-reveal="up">những ngày bên nhau</div>
     <div class="ornament" data-reveal="vine" aria-hidden="true"></div>
   </div>
-  <div class="album-grid" id="album">
-    <button class="tile tile-hero" type="button" data-reveal="zoom" data-full="assets/img/tey00241.jpg" aria-label="Xem ảnh"><img src="assets/img/tey00241-640.jpg" srcset="assets/img/tey00241-640.jpg 640w, assets/img/tey00241.jpg 964w" sizes="(min-width: 680px) 425px, 64vw" alt="" loading="lazy"></button>
-    <button class="tile" type="button" data-reveal="up" data-full="assets/img/p13.jpg" aria-label="Xem ảnh"><img src="assets/img/p13-640.jpg" srcset="assets/img/p13-640.jpg 640w, assets/img/p13.jpg 933w" sizes="(min-width: 680px) 207px, 31vw" alt="" loading="lazy"></button>
-    <button class="tile" type="button" data-reveal="up" data-full="assets/img/tey00811.jpg" aria-label="Xem ảnh"><img src="assets/img/tey00811-640.jpg" srcset="assets/img/tey00811-640.jpg 640w, assets/img/tey00811.jpg 964w" sizes="(min-width: 680px) 207px, 31vw" alt="" loading="lazy" style="object-position:50% 40%"></button>
-    <button class="tile" type="button" data-reveal="up" data-full="assets/img/n01.jpg" aria-label="Xem ảnh"><img src="assets/img/n01-640.jpg" srcset="assets/img/n01-640.jpg 640w, assets/img/n01.jpg 964w" sizes="(min-width: 680px) 207px, 31vw" alt="" loading="lazy" style="object-position:50% 50%"></button>
-    <button class="tile" type="button" data-reveal="up" data-full="assets/img/p07.jpg" aria-label="Xem ảnh"><img src="assets/img/p07-640.jpg" srcset="assets/img/p07-640.jpg 640w, assets/img/p07.jpg 933w" sizes="(min-width: 680px) 207px, 31vw" alt="" loading="lazy"></button>
-    <button class="tile tile-more" type="button" data-reveal="up" data-full="assets/img/tey00844.jpg" aria-label="Xem thêm 7 ảnh trong album"><span class="tile-more-cap">Xem thêm</span><span class="tile-more-n">7 ảnh nữa</span></button>
-    <!-- The other photos open only in the viewer, after the ones above. -->
-    <span hidden data-full="assets/img/n04.jpg"></span>
-    <span hidden data-full="assets/img/p15c.jpg"></span>
-    <span hidden data-full="assets/img/tey00773.jpg"></span>
-    <span hidden data-full="assets/img/tey00934.jpg"></span>
-    <span hidden data-full="assets/img/p16.jpg"></span>
-    <span hidden data-full="assets/img/p17.jpg"></span>
+  <div class="album-view" id="album">
+    <div class="album-stage" data-reveal="zoom">
+      <button class="album-main" id="album-main" type="button" aria-label="Phóng to ảnh"><img id="album-img" src="assets/img/tey00241.jpg" width="964" height="1446" alt="" loading="lazy"></button>
+      <button class="album-nav album-prev" id="album-prev" type="button" aria-label="Ảnh trước"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="album-nav album-next" id="album-next" type="button" aria-label="Ảnh sau"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="album-thumbs" id="album-thumbs" role="group" aria-label="Chọn ảnh" data-reveal="up">
+      <button class="thumb" type="button" data-full="assets/img/tey00241.jpg" aria-label="Xem ảnh 1" aria-current="true"><img src="assets/img/tey00241-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/n04.jpg" aria-label="Xem ảnh 2"><img src="assets/img/n04-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/p07.jpg" aria-label="Xem ảnh 3"><img src="assets/img/p07-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/p15c.jpg" aria-label="Xem ảnh 4"><img src="assets/img/p15c-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/p13.jpg" aria-label="Xem ảnh 5"><img src="assets/img/p13-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/tey00811.jpg" aria-label="Xem ảnh 6"><img src="assets/img/tey00811-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/tey00773.jpg" aria-label="Xem ảnh 7"><img src="assets/img/tey00773-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/tey00844.jpg" aria-label="Xem ảnh 8"><img src="assets/img/tey00844-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/p16.jpg" aria-label="Xem ảnh 9"><img src="assets/img/p16-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/p17.jpg" aria-label="Xem ảnh 10"><img src="assets/img/p17-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/tey00934.jpg" aria-label="Xem ảnh 11"><img src="assets/img/tey00934-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+      <button class="thumb" type="button" data-full="assets/img/n01.jpg" aria-label="Xem ảnh 12"><img src="assets/img/n01-240.jpg" width="240" height="360" alt="" loading="lazy"></button>
+    </div>
   </div>
 </section>
 

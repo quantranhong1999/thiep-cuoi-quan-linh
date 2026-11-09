@@ -429,18 +429,46 @@
     $$('[data-ics]').forEach(a => { a.href = a.getAttribute('data-ics'); a.removeAttribute('target'); });
   }
 
-  // ---------- album lightbox ----------
-  const tiles = $$('#album [data-full]');
-  const PHOTOS = tiles.map(t => t.getAttribute('data-full'));
+  // ---------- album: one large photo, a strip of thumbnails, and the full-screen viewer ----------
+  const thumbs = $$('#album [data-full]');
+  const PHOTOS = thumbs.map(t => t.getAttribute('data-full'));
+  const wrapIndex = i => (i + PHOTOS.length) % PHOTOS.length;
+  // Only one large photo is on the page, so fetch the neighbours before the guest moves to them.
+  const preloadAround = i => [1, -1].forEach(d => { new Image().src = PHOTOS[wrapIndex(i + d)]; });
+  // Looking through photos takes longer than the usual pause of the auto-scroll.
+  const holdAuto = () => { if (auto && auto.on) { auto.resumeAt = performance.now() + 12000; auto.acc = null; } };
+
+  const strip = $('#album-thumbs'), stage = $('#album-main'), stageImg = $('#album-img');
+  let stageIndex = 0;
+  function showStage(i) {
+    const want = stageIndex = wrapIndex(i);
+    thumbs.forEach((t, k) => { if (k === want) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current'); });
+    const t = thumbs[want];
+    strip.scrollTo({ left: t.offsetLeft - (strip.clientWidth - t.offsetWidth) / 2, behavior: reducedMotion ? 'auto' : 'smooth' });
+    const next = new Image();
+    next.src = PHOTOS[want];
+    const swap = () => {
+      if (want !== stageIndex) return; // the guest has already moved on
+      stageImg.src = PHOTOS[want];
+      if (fxOn) stageImg.animate(FX.fade, { duration: 450, easing: EASE });
+      preloadAround(want);
+    };
+    if (next.decode) next.decode().then(swap, swap); else swap();
+  }
+  function stageStep(d) { holdAuto(); showStage(stageIndex + d); }
+  thumbs.forEach((t, i) => t.addEventListener('click', () => { holdAuto(); showStage(i); }));
+  $('#album-prev').addEventListener('click', () => stageStep(-1));
+  $('#album-next').addEventListener('click', () => stageStep(1));
+  stage.addEventListener('click', () => showPhoto(stageIndex));
+
   const lightbox = $('#lightbox'), lbImg = $('#lb-img'), lbCount = $('#lb-count');
   let lbIndex = -1, lbReturn = null;
   function showPhoto(i) {
     const first = lbIndex < 0;
-    lbIndex = (i + PHOTOS.length) % PHOTOS.length;
+    lbIndex = wrapIndex(i);
     lbImg.src = PHOTOS[lbIndex];
     lbCount.textContent = (lbIndex + 1) + ' / ' + PHOTOS.length;
-    // Half of the album is not on the page, so fetch the neighbours before the guest swipes to them.
-    [1, -1].forEach(d => { new Image().src = PHOTOS[(lbIndex + d + PHOTOS.length) % PHOTOS.length]; });
+    preloadAround(lbIndex);
     if (first) {
       lbReturn = document.activeElement;
       lightbox.hidden = false;
@@ -450,24 +478,28 @@
   }
   function closeLightbox() {
     if (lbIndex < 0) return;
+    if (lbIndex !== stageIndex) showStage(lbIndex); // the large photo follows what the guest was viewing
     lbIndex = -1;
     lightbox.hidden = true;
     if (lbReturn && lbReturn.focus) try { lbReturn.focus({ preventScroll: true }); } catch (e) { /* old Safari */ }
   }
-  tiles.forEach((t, i) => t.addEventListener('click', () => showPhoto(i)));
   lightbox.addEventListener('click', closeLightbox);
   lbImg.addEventListener('click', e => e.stopPropagation());
   $('#lb-prev').addEventListener('click', e => { e.stopPropagation(); showPhoto(lbIndex - 1); });
   $('#lb-next').addEventListener('click', e => { e.stopPropagation(); showPhoto(lbIndex + 1); });
   $('#lb-close').addEventListener('click', e => { e.stopPropagation(); closeLightbox(); });
-  let swipeX = null;
-  lightbox.addEventListener('touchstart', e => { swipeX = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
-  lightbox.addEventListener('touchend', e => {
-    if (swipeX === null) return;
-    const dx = e.changedTouches[0].clientX - swipeX;
-    swipeX = null;
-    if (Math.abs(dx) > 50) { e.preventDefault(); showPhoto(lbIndex + (dx < 0 ? 1 : -1)); }
-  });
+  function onSwipe(el, go) {
+    let startX = null;
+    el.addEventListener('touchstart', e => { startX = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    el.addEventListener('touchend', e => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 50) { e.preventDefault(); go(dx < 0 ? 1 : -1); }
+    });
+  }
+  onSwipe(lightbox, d => showPhoto(lbIndex + d));
+  onSwipe(stage, stageStep);
   window.addEventListener('keydown', e => {
     if (lbIndex < 0) return;
     if (e.key === 'Escape') closeLightbox();

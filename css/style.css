@@ -362,19 +362,20 @@ html.no-fx .cal-heart { animation: none; }
 
 /* ---------- 9. album ---------- */
 .album { background: var(--panel); }
-/* A short mosaic: one large photo, four small ones and a tile that leads to the rest in the viewer. */
-.album-grid { max-width: 640px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(6px, 1.6cqi, 12px); }
-.tile { display: block; width: 100%; padding: 0; border: 0; background: var(--placeholder); overflow: hidden; cursor: zoom-in; aspect-ratio: 2 / 3; }
-.tile img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
-/* the large photo takes its height from the two rows beside it, so its image must not size the row */
-.tile-hero { grid-column: span 2; grid-row: span 2; position: relative; aspect-ratio: auto; height: 100%; }
-.tile-hero img { position: absolute; inset: 0; }
-/* the last tile is a small paper card, framed like the gift cards */
-.tile-more { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 8px; background: #fff; border: 1px solid var(--line); outline: 1px solid var(--line); outline-offset: -6px; cursor: pointer; transition: background .3s; }
-.tile-more:hover { background: var(--panel-2); }
-.tile-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tile-more-cap { font-family: var(--f-script); font-size: clamp(30px, 8.6cqi, 46px); line-height: 1.15; color: var(--primary); }
-.tile-more-n { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+/* One large photo with arrows above a strip of thumbnails that scrolls sideways; the large photo opens the viewer. */
+.album-view { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.album-stage { position: relative; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 14px; background: var(--placeholder); box-shadow: 0 14px 34px rgba(34, 41, 31, .18); }
+.album-main { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; touch-action: pan-y; }
+.album-main img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.album-nav { position: absolute; top: 50%; width: 48px; height: 72px; margin-top: -36px; padding: 0; display: flex; align-items: center; justify-content: center; border: 0; background: none; color: #fff; cursor: pointer; filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .6)); }
+.album-nav svg { width: 32px; height: 32px; }
+.album-prev { left: 2px; }
+.album-next { right: 2px; }
+.album-thumbs { position: relative; display: flex; gap: 8px; padding: 2px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.album-thumbs::-webkit-scrollbar { display: none; }
+.thumb { flex: none; width: 66px; aspect-ratio: 2 / 3; padding: 0; border: 2px solid transparent; border-radius: 9px; overflow: hidden; background: var(--placeholder); opacity: .6; cursor: pointer; transition: opacity .25s, border-color .25s; }
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.thumb[aria-current="true"] { opacity: 1; border-color: var(--primary); }
 
 /* ---------- 11. RSVP + wishes ---------- */
 .rsvp { background: var(--paper); scroll-margin-top: 0; }
