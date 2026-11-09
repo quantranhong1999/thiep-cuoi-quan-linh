@@ -783,15 +783,21 @@
 
   // ---------- gift box: the QR codes stay inside until a guest opens it ----------
   const giftBox = $('#giftbox'), giftPanel = $('#gift-panel');
-  giftBox.addEventListener('click', () => {
+  // Once the lid is off the box goes away and the QR cards take its place.
+  function showGifts() {
+    giftBox.hidden = true;
     giftPanel.hidden = false;
+    if (fxOn) $$('.gift-card', giftPanel).forEach((c, i) => c.animate(FX.up, { duration: 900, delay: i * 140, easing: EASE, fill: 'backwards' }));
+    giftPanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+  }
+  giftBox.addEventListener('click', () => {
     giftBox.setAttribute('aria-expanded', 'true');
-    giftBox.disabled = true; // it only opens once, so keyboards and screen readers skip it from here on
+    giftBox.disabled = true;
     $('#giftbox-hint').hidden = true;
     if (auto && auto.on) stopAuto(); // the page must hold still while a guest scans or copies
+    if (!fxOn) { showGifts(); return; }
     burst($('svg', giftBox));
-    if (fxOn) $$('.gift-card', giftPanel).forEach((c, i) => c.animate(FX.up, { duration: 900, delay: 350 + i * 140, easing: EASE, fill: 'backwards' }));
-    setTimeout(() => giftPanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }), fxOn ? 700 : 0);
+    giftBox.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(.92)' }], { duration: 260, delay: 750, easing: 'ease-in', fill: 'forwards' }).onfinish = showGifts;
   });
 
   // ---------- gift: copy account number ----------
