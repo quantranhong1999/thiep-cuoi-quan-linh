@@ -440,6 +440,8 @@
     lbIndex = (i + PHOTOS.length) % PHOTOS.length;
     lbImg.src = PHOTOS[lbIndex];
     lbCount.textContent = (lbIndex + 1) + ' / ' + PHOTOS.length;
+    // Half of the album is not on the page, so fetch the neighbours before the guest swipes to them.
+    [1, -1].forEach(d => { new Image().src = PHOTOS[(lbIndex + d + PHOTOS.length) % PHOTOS.length]; });
     if (first) {
       lbReturn = document.activeElement;
       lightbox.hidden = false;
