@@ -778,18 +778,16 @@
   }
 
   // ---------- gift box: the QR codes stay inside until a guest opens it ----------
-  const giftBox = $('#giftbox'), giftPanel = $('#gift-panel'), giftHint = $('#giftbox-hint');
+  const giftBox = $('#giftbox'), giftPanel = $('#gift-panel');
   giftBox.addEventListener('click', () => {
-    const open = giftPanel.hidden;
-    giftPanel.hidden = !open;
-    giftBox.setAttribute('aria-expanded', String(open));
-    giftHint.textContent = open ? 'Đóng hộp quà' : 'Chạm để mở hộp quà';
-    if (!open) return;
+    giftPanel.hidden = false;
+    giftBox.setAttribute('aria-expanded', 'true');
+    $('#giftbox-hint').hidden = true;
     if (auto && auto.on) stopAuto(); // the page must hold still while a guest scans or copies
     burst($('svg', giftBox));
     if (fxOn) $$('.gift-card', giftPanel).forEach((c, i) => c.animate(FX.up, { duration: 900, delay: 350 + i * 140, easing: EASE, fill: 'backwards' }));
     setTimeout(() => giftPanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }), fxOn ? 700 : 0);
-  });
+  }, { once: true });
 
   // ---------- gift: copy account number ----------
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
