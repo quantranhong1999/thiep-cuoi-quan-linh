@@ -363,8 +363,8 @@ html.no-fx .cal-heart { animation: none; }
 /* ---------- 9. album ---------- */
 .album { background: var(--panel); }
 /* One large photo with arrows above a strip of thumbnails that scrolls sideways; the large photo opens the viewer. */
-/* wider than the section's padding allows on phones: the photo runs almost edge to edge, centred by the negative margins */
-.album-view { --album-w: min(640px, 100cqi - 12px); width: var(--album-w); margin-inline: calc(50% - var(--album-w) / 2); display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+/* As large as fits: never taller than the screen (computers), almost edge to edge (phones, past the section's padding, centred by the negative margins). */
+.album-view { --album-w: min(640px, 100cqi - 12px, (100svh - 40px) * 2 / 3); width: var(--album-w); margin-inline: calc(50% - var(--album-w) / 2); display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .album-stage { position: relative; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 14px; background: var(--placeholder); box-shadow: 0 14px 34px rgba(34, 41, 31, .18); }
 .album-main { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; touch-action: pan-y; }
 .album-main img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -374,7 +374,7 @@ html.no-fx .cal-heart { animation: none; }
 .album-next { right: 2px; }
 .album-thumbs { position: relative; display: flex; gap: 8px; padding: 2px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .album-thumbs::-webkit-scrollbar { display: none; }
-.thumb { flex: none; width: clamp(66px, 13cqi, 92px); aspect-ratio: 2 / 3; padding: 0; border: 2px solid transparent; border-radius: 9px; overflow: hidden; background: var(--placeholder); opacity: .6; cursor: pointer; transition: opacity .25s, border-color .25s; }
+.thumb { flex: none; width: clamp(66px, 13cqi, 76px); aspect-ratio: 2 / 3; padding: 0; border: 2px solid transparent; border-radius: 9px; overflow: hidden; background: var(--placeholder); opacity: .6; cursor: pointer; transition: opacity .25s, border-color .25s; }
 .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .thumb[aria-current="true"] { opacity: 1; border-color: var(--primary); }
 
@@ -441,7 +441,7 @@ html.no-fx .cal-heart { animation: none; }
 .gb-card { transition: transform .7s var(--ease) .25s; }
 .giftbox[aria-expanded="true"] .gb-lid { transform: translate(34px, -74px) rotate(18deg); opacity: 0; }
 .giftbox[aria-expanded="true"] .gb-card { transform: translateY(-42px); }
-.giftbox[aria-expanded="true"] { cursor: default; }
+.giftbox:disabled { cursor: default; opacity: 1; }
 .giftbox-hint { color: var(--accent); }
 @keyframes gift-shake { 0%, 82%, 100% { transform: none; } 86% { transform: rotate(-4deg); } 90% { transform: rotate(4deg); } 94% { transform: rotate(-2.5deg); } 97% { transform: rotate(1.5deg); } }
 html.no-fx .giftbox svg { animation: none !important; }

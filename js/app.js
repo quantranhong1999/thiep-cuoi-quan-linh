@@ -489,13 +489,17 @@
   $('#lb-next').addEventListener('click', e => { e.stopPropagation(); showPhoto(lbIndex + 1); });
   $('#lb-close').addEventListener('click', e => { e.stopPropagation(); closeLightbox(); });
   function onSwipe(el, go) {
-    let startX = null;
-    el.addEventListener('touchstart', e => { startX = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    let startX = null, startY = 0;
+    el.addEventListener('touchstart', e => {
+      startX = e.touches.length === 1 ? e.touches[0].clientX : null;
+      if (startX !== null) startY = e.touches[0].clientY;
+    }, { passive: true });
     el.addEventListener('touchend', e => {
       if (startX === null) return;
-      const dx = e.changedTouches[0].clientX - startX;
+      const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
       startX = null;
-      if (Math.abs(dx) > 50) { e.preventDefault(); go(dx < 0 ? 1 : -1); }
+      // A mostly vertical drag is the guest scrolling the page, not swiping.
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { e.preventDefault(); go(dx < 0 ? 1 : -1); }
     });
   }
   onSwipe(lightbox, d => showPhoto(lbIndex + d));
@@ -782,12 +786,13 @@
   giftBox.addEventListener('click', () => {
     giftPanel.hidden = false;
     giftBox.setAttribute('aria-expanded', 'true');
+    giftBox.disabled = true; // it only opens once, so keyboards and screen readers skip it from here on
     $('#giftbox-hint').hidden = true;
     if (auto && auto.on) stopAuto(); // the page must hold still while a guest scans or copies
     burst($('svg', giftBox));
     if (fxOn) $$('.gift-card', giftPanel).forEach((c, i) => c.animate(FX.up, { duration: 900, delay: 350 + i * 140, easing: EASE, fill: 'backwards' }));
     setTimeout(() => giftPanel.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }), fxOn ? 700 : 0);
-  }, { once: true });
+  });
 
   // ---------- gift: copy account number ----------
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
