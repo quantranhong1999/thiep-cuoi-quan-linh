@@ -32,12 +32,3 @@ Mở http://localhost:5173. Khi chưa có `sheetUrl`, hồi âm và lời chúc 
 Sửa file, commit rồi push lên `main`. GitHub Actions tự đăng lại sau khoảng một phút.
 Để `sheetUrl` trong `js/config.js` luôn trống trong repo; URL thật nằm ở secret `SHEET_URL`.
 Trình duyệt của khách có thể giữ bản cũ thêm tối đa 10 phút.
-
-## Google Sheets
-
-Hồi âm và lời chúc về tab "Xác nhận" của Google Sheet "database thiệp cưới", qua dự án Apps Script "Thiệp cưới Quân & Linh"
-gắn với Sheet đó (Tiện ích → Apps Script). URL ứng dụng web nằm trong secret `SHEET_URL` của repo.
-Sửa `google-sheets/Code.gs` thì dán lại vào Apps Script và tạo phiên bản triển khai mới, xem `google-sheets/Huong-dan.md`.
-
-Ghi chú: mã QR cô dâu chứa tài khoản ảo MB `VQRQANHPB1802` (mã tham chiếu `NPS6869`), không phải số `01602486663322`
-in trên thiệp. Đây là chủ ý, giữ nguyên mã này. Mã chú rể khớp số `0965697012`.
